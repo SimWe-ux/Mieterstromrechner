@@ -1,6 +1,9 @@
 # ----Variablen aus UI Einagbe----
 wohneinheiten: int = 2
-wohnungen_verbrauch_kwh: float = 2_500.0    
+wohnungen_verbrauch_kwh: float = 2_500.0  
+
+pv_kwp: float = 10.0
+speicher_kwh: float = 0.0
 
 gewerbe_aktiv: bool = False
 gewerbe_verbrauch_kwh: float = 0.0          
