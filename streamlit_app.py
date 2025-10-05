@@ -1,4 +1,5 @@
 import streamlit as st
+import Configurations as C
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -25,3 +26,14 @@ with st.sidebar:
     has_WP = st.toggle("Wärmepumpe vorhanden?", value=False)   
     if has_WP: #
         has_WP = st.number_input("Wärmepumpenverbrauch", min_value=1000, max_value=100000, value=2500, step=100)  
+
+# ----Mapping in Configurations.py---
+C.wohneinheiten = int(we)
+C.wohnungen_verbrauch_kwh = float(verbrauch_we)
+C.gewerbe_aktiv = bool(has_ge)
+C.gewerbe_verbrauch_kwh = float(ge_verbrauch) if has_ge else 0.0
+C.pv_kwp = float(pv)
+C.speicher_kwh = float(speicher)
+C.soc_start_kwh = 0.20 * C.speicher_kwh
+C.wp_aktiv = bool(has_wp)
+C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
