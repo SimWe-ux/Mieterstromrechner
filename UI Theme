@@ -1,0 +1,7 @@
+# ----Theme----
+.streamlit/config.toml
+
+primaryColor = "#8A2BE2"            # violet (blueviolet)
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F5F9"
+textColor = "#000000"
