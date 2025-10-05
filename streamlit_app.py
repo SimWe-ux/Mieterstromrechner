@@ -5,6 +5,7 @@ st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="ce
 st.title("⚡ Mieterstrom - RenditeRechner")
 
 # ---- UI: Eingabe----
+with st.sidebar:
 st.header("Eingabe")
 
 st.select_slider("Anzahl Wohneinheiten", min_value:1, max_value:25, value:2, steps: 1)
