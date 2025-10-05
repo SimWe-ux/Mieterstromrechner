@@ -15,7 +15,6 @@ with st.sidebar:
 
     # Wenn Gewerbeeinheiten vorhanden 
     if has_GE: #
-        st.markdown("**Gewerbeeinheiten**") 
         has_GE = st.number_input("Jahresverbrauch Gewerbeeinheiten", min_value=2500, max_value=100000, value=2500, step=100)  
    
     pv = st.slider("PV-Anlage", min_value=1, max_value=100, value=10, step=1)
