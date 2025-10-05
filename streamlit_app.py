@@ -11,9 +11,4 @@ with st.sidebar:
 
     we = st.slider("Anzahl Wohneinheiten", min_value=1, max_value=25, value=2, step=1)
 
-    color = st.slider(
-    "Anzahl Wohneinheiten",
-    options=[
-        "violet",
-    ],
-)
+ we = st.number_input("Gesamtverbrauch")
