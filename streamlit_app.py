@@ -1,6 +1,4 @@
 import streamlit as st
-import Configurations.py as C
-import Model.py as M  
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
