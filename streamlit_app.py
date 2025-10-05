@@ -26,7 +26,7 @@ strompreissteigerung_pa: float = 0.03 # Strompreissteigerung pro Jahr
 
 # ----Betriebskosten---- 
 abrechnungskosten = 70 # Abbrechnungssoftwarekosten 
-zaehlergebuehren_we = 30 # POG Zählergebühren 
+zaehlergebuehren_we = 30 # POG Zählergebühren WE
 zaehlergebuehren_pv = 50 # POG Zählergebühren PV/WP Zähler 
 
 def pv_preis_pro_kwp(pv_kwp: float, c: Konstanten) -> float:
