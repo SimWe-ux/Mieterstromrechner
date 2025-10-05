@@ -21,6 +21,6 @@ with st.sidebar:
     speicher = st.slider("Speichergröße", min_value=0, max_value=100, value=0, step=1)
 
 # Wenn Wärmepumpe vorhanden 
-     has_WP = st.toggle("Wärmepumpe vorhanden?", value=False)   
+    has_WP = st.toggle("Wärmepumpe vorhanden?", value=False)   
     if has_WP: #
         has_WP = st.number_input("Wärmepumpenverbrauch", min_value=1000, max_value=100000, value=2500, step=100)  
