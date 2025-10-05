@@ -6,6 +6,6 @@ st.title("⚡ Mieterstrom - RenditeRechner")
 
 # ---- UI: Eingabe----
 with st.sidebar:
-st.header("Eingabe")
+  st.header("Eingabe")
 
-we = st.select_slider("Anzahl Wohneinheiten", min_value:1, max_value:25, value:2, steps: 1)
+  we = st.select_slider("Anzahl Wohneinheiten", min_value:1, max_value:25, value:2, steps: 1)
