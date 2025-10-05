@@ -15,7 +15,6 @@ with st.sidebar:
 
     # Wenn Gewerbeeinheiten vorhanden 
     if has_GE: #
-        st.markdown("---")
         st.markdown("**Gewerbeeinheiten**") 
         has_GE = st.number_input("Jahresverbrauch Gewerbeeinheiten", min_value=2500, max_value=100000, value=2500, step=100)  
    
@@ -25,6 +24,5 @@ with st.sidebar:
 
 # Wenn Wärmepumpe vorhanden 
     if has_WP: #
-        st.markdown("---")
         st.markdown("**Wärmepumpe**") 
         has_WP = st.number_input("Wärmepumpenverbrauch", min_value=1000, max_value=100000, value=2500, step=100)  
