@@ -1,3 +1,13 @@
+# ----Variablen aus UI Einagbe----
+wohneinheiten: int = 2
+wohnungen_verbrauch_kwh: float = 2_500.0    
+
+gewerbe_aktiv: bool = False
+gewerbe_verbrauch_kwh: float = 0.0          
+
+wp_aktiv: bool = False
+wp_verbrauch_kwh: float = 0.0               
+
 # ----Pv und Battrerie----
 pv_form_exponent = 3 # PV Tageskurve 
 ladeleistung = 3 # Max. Ladeleistung (kW) – konservativ
