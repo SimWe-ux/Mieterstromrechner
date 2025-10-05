@@ -23,5 +23,4 @@ with st.sidebar:
 
 # Wenn Wärmepumpe vorhanden 
     if has_WP: #
-        st.markdown("**Wärmepumpe**") 
         has_WP = st.number_input("Wärmepumpenverbrauch", min_value=1000, max_value=100000, value=2500, step=100)  
