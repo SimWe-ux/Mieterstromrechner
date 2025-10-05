@@ -12,8 +12,8 @@ with st.sidebar:
     we = st.slider("Anzahl Wohneinheiten", min_value=1, max_value=25, value=2, step=1)
     number = st.number_input("Jahresverbauch Wohnungen", min_value=1500, max_value=100000, value=2500, step=100)
     has_GE = st.toggle("Gewerbeeinheiten vorhanden?", value=False)
-    pv= st.slider("PV-Anlage", min_value=1, max_value=100, value=10, step=1)
-    speicher = st.slider("Speichergröße", min_value=0, max_value=100, value=0, sept=1)
+    pv = st.slider("PV-Anlage", min_value=1, max_value=100, value=10, step=1)
+    sp = st.slider("Speichergröße", min_value=0, max_value=100, value=0, sept=1)
     has_WP = st.toggle("Wärmepumpe vorhanden?", value=False)
     
 # Wenn Gewerbeeinheiten vorhanden 
