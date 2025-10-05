@@ -15,5 +15,5 @@ with st.sidebar:
 # Wenn Gewerbeeinheiten vorhanden 
     if has_GE: #
         st.markdown("---")
-        st.markdown("**Gewerbeeinheiten"**) 
+        st.markdown("**Gewerbeeinheiten**") 
         has_GE = st.number_input("Verbrauch Gewerbeeinheiten", min_value=2500, max_vaalue=100000 value=2500, step=100)    
