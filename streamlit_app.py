@@ -7,7 +7,7 @@ st.title("⚡ Mieterstrom - Renditerechner")
 # ----Konstante----
 PV_Form_Exponent = 3 # PV Tageskurve 
 Ladeleistung_kW = 3 # Max. Ladeleistung (kW) – konservativ
-Entladeleistung_kW = 3 Max. Endladeleistung (kW) – konservativ
+Entladeleistung_kW = 3 # Max. Endladeleistung (kW) – konservativ
 Wirkungsgrad_Roundtrip = 0,85 # Gesamtwirkungsgrad Laden*Entladen
 Standby_Watt = 20 # Optionale Standby‑/Eigenverbrauchsverluste des Speichers (W)
 SOC_Start_kWh = "Speichergröße"*20% # Start‑Ladezustand (kWh)  
