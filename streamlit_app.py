@@ -10,7 +10,8 @@ with st.sidebar:
     st.header("Eingabe")
 
     we = st.slider("Anzahl Wohneinheiten", min_value=1, max_value=25, value=2, step=1)
-color = st.select_slider(
+
+    color = st.select_slider(
     "Anzahl Wohneinheiten",
     options=[
         "violet",
