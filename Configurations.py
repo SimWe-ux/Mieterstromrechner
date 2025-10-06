@@ -17,7 +17,7 @@ ladeleistung: float = 3 # Max. Ladeleistung (kW) – konservativ
 entladeleistung: float = 3 # Max. Endladeleistung (kW) – konservativ
 wirkungsgrad_roundtrip: float = 0.85 # Gesamtwirkungsgrad Laden*Entladen
 standby_watt: float = 20 # Optionale Standby‑/Eigenverbrauchsverluste des Speichers (W)
-soc_start_kwh = 0.20 * speicher_kwh# Start‑Ladezustand (kWh)  
+soc_start_kwh: float = 0.20 * speicher_kwh# Start‑Ladezustand (kWh)  
 
 # ----Preise und Vergütung----
 preis_pv_u10_kwp: float = 1500.0
