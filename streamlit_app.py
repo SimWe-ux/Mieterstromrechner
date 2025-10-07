@@ -1,5 +1,5 @@
 import streamlit as st
-import Configurations as C
+import configurations as C
 import model as M 
 
 # ----Seiteneinstellungen----
