@@ -55,3 +55,5 @@ st.write("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
 st.caption("Profiles geladen (Anzahl Werte):")
 st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
+
+streamlit run streamlit_app.py
