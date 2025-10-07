@@ -1,1 +1,7 @@
+from profiles import (
+    LASTPROFIL_WOHNUNG,
+    LASTPROFIL_WP,
+    LASTPROFIL_GEWERBE,
+    PV_GEWICHT,
+)
 
