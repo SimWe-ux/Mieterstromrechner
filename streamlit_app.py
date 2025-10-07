@@ -1,6 +1,7 @@
 import streamlit as st
 import configurations as C
 import model as M 
+import profiles as P
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -51,3 +52,6 @@ col3.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 
 st.write("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 st.write("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
+
+st.caption("Profiles geladen (Anzahl Werte):")
+st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
