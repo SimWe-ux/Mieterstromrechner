@@ -1,6 +1,6 @@
 import streamlit as st
 import configurations as C
-import model as M 
+import model as M
 import profiles as P
 
 # ----Seiteneinstellungen----
