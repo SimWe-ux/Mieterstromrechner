@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import Dict, Any
 import numpy as np
-import Configurations as C
+import configurations as C
 from profiles import (
     LASTPROFIL_WOHNUNG,
     LASTPROFIL_WP,
