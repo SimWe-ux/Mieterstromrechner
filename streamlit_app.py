@@ -58,29 +58,34 @@ st.write("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 st.caption("Profiles geladen (Anzahl Werte):")
 st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
 
-# ----UI Outcome----
-
-st.header("PV-Erzeugung")
-
-# ---- Tageswerte (365 Tage) als Liniendiagramm ----
+# ---- Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
-def daily_sum(series):
-    arr = np.array(series, dtype=float)
-    days = (len(arr) // 24) * 24           # volle Tage (8760 -> 365*24)
-    arr = arr[:days].reshape(-1, 24).sum(axis=1)
-    return arr
+def monthly_sum(series):
+    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
+    s = pd.Series(series, index=idx, dtype=float)
+    return s.resample("M").sum()  # 12 Summen Jan..Dez
 
-df = pd.DataFrame({
-    "PV-Erzeugung [kWh]":          daily_sum(R["pv_prod"]),
-    "Eigenverbrauch [kWh]":        daily_sum(R["eigenverbrauch"]),
-    "Batterie-Entladung [kWh]":    daily_sum(R["batt_to_load"]),  # AC-Energie zur Last
-    "Batterie-Ladung [kWh]":       daily_sum(R["charge"]),        # Energie in den Speicher
-    "Netzeinspeisung [kWh]":       daily_sum(R["netzeinspeisung"]),
-    "Netzbezug [kWh]":             daily_sum(R["netzbezug"]),
-}, index=pd.Index(range(1, 1 + len(daily_sum(R["pv_prod"]))), name="Tag"))
+pv_m      = monthly_sum(R["pv_prod"])
+ev_m      = monthly_sum(R["eigenverbrauch"])
+batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
+batt_inm  = monthly_sum(R["charge"])          # Ladung (in den Speicher)
+feedin_m  = monthly_sum(R["netzeinspeisung"])
+grid_m    = monthly_sum(R["netzbezug"])
 
-st.subheader("Tageswerte – Jahresverlauf")
-st.line_chart(df)
+df_m = pd.concat(
+    [
+        pv_m.rename("PV-Erzeugung [kWh]"),
+        ev_m.rename("Eigenverbrauch [kWh]"),
+        batt_outm.rename("Batterie-Entladung [kWh]"),
+        batt_inm.rename("Batterie-Ladung [kWh]"),
+        feedin_m.rename("Netzeinspeisung [kWh]"),
+        grid_m.rename("Netzbezug [kWh]"),
+    ],
+    axis=1,
+)
+
+st.subheader("Monatswerte – Jahresverlauf")
+st.line_chart(df_m)
 
 
