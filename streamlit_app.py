@@ -56,27 +56,6 @@ col1.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 col2.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
-
-# --- Pie: Deckung des Jahresverbrauchs ---
-R = sim["reihen"]
-pv_direct   = float(np.sum(R["direkt"]))        # PV -> Last direkt
-batt_out    = float(np.sum(R["batt_to_load"]))  # Batterie -> Last (AC)
-grid_import = float(np.sum(R["netzbezug"]))     # Netz -> Last
-
-total_load = pv_direct + batt_out + grid_import
-if total_load > 0:
-    df_pie = pd.DataFrame({
-        "Quelle": ["Direktverbrauch", "Batterieentladung", "Netzbezug"],
-        "kWh":    [pv_direct,        batt_out,            grid_import],
-    })
-    fig = px.pie(df_pie, names="Quelle", values="kWh", hole=0.35,
-                 title="Deckung des Jahresverbrauchs")
-    fig.update_traces(textinfo="percent+label",
-                      hovertemplate="%{label}<br>%{value:.0f} kWh (%{percent})")
-    fig.update_layout(legend_title="")
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.info("Keine Lastdaten für das Diagramm.")
     
 
 # ---- Jahresverlauf----
