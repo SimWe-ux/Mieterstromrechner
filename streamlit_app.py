@@ -49,10 +49,9 @@ sim = M.simulate_hourly()
 S = sim["summen"]
 
 col1, col2 = st.columns(2)
-col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
+col1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 col1.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 
-col2.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 col2.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
