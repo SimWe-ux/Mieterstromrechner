@@ -53,8 +53,8 @@ col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 col3.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 
-st.write("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
-st.write("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
+col4.metrics("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
+col5.metrics("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
 st.caption("Profiles geladen (Anzahl Werte):")
 st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
