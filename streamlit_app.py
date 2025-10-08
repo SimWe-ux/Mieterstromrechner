@@ -77,6 +77,7 @@ df_m = pd.concat(
         pv_m.rename("PV-Erzeugung [kWh]"),
         ev_m.rename("Eigenverbrauch [kWh]"),
         batt_outm.rename("Batterie-Entladung [kWh]"),
+        
         batt_inm.rename("Batterie-Ladung [kWh]"),
         feedin_m.rename("Netzeinspeisung [kWh]"),
         grid_m.rename("Netzbezug [kWh]"),
