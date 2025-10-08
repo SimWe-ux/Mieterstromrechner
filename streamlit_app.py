@@ -2,6 +2,8 @@ import streamlit as st
 import configurations as C
 import model as M
 import profiles as P
+import numpy as np
+import pandas as pd
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -58,5 +60,26 @@ st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWER
 
 # ----UI Outcome----
 
-st.header("Mieterstrom Ergebnisse")
+st.header("PV-Erzeugung")
+# ---- Tageswerte (365 Tage) als Liniendiagramm ----
+R = sim["reihen"]  # stündliche Reihen aus dem Modell
+
+def daily_sum(series):
+    arr = np.array(series, dtype=float)
+    days = (len(arr) // 24) * 24           # volle Tage (8760 -> 365*24)
+    arr = arr[:days].reshape(-1, 24).sum(axis=1)
+    return arr
+
+df = pd.DataFrame({
+    "PV-Erzeugung [kWh]":          daily_sum(R["pv_prod"]),
+    "Eigenverbrauch [kWh]":        daily_sum(R["eigenverbrauch"]),
+    "Batterie-Entladung [kWh]":    daily_sum(R["batt_to_load"]),  # AC-Energie zur Last
+    "Batterie-Ladung [kWh]":       daily_sum(R["charge"]),        # Energie in den Speicher
+    "Netzeinspeisung [kWh]":       daily_sum(R["netzeinspeisung"]),
+    "Netzbezug [kWh]":             daily_sum(R["netzbezug"]),
+}, index=pd.Index(range(1, 1 + len(daily_sum(R["pv_prod"]))), name="Tag"))
+
+st.subheader("Tageswerte – Jahresverlauf")
+st.line_chart(df)
+
 
