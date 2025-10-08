@@ -44,6 +44,9 @@ C.wp_aktiv = bool(has_wp)
 C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 
 # ----Simulation & KPIs----
+
+sim = M.simulate_hourly() S = sim["summen"]
+
 col1, col2, col3 = st.columns(3)
 col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
