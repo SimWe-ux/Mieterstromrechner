@@ -4,7 +4,6 @@ import model as M
 import profiles as P
 import numpy as np
 import pandas as pd
-import plotly.express as px
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
