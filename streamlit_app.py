@@ -52,7 +52,6 @@ col1, col2, col3, col4, col5 = st.columns(3)
 col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 col3.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-
 col4.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col5.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
