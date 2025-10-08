@@ -4,6 +4,7 @@ import model as M
 import profiles as P
 import numpy as np
 import pandas as pd
+import altair as alt
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -83,20 +84,35 @@ df_m = pd.concat(
     ],
     axis=1,
 )
+labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
+df_plot = df_m.copy()
+df_plot["MonatNum"] = df_plot.index.month
+df_plot["Monat"] = df_plot["MonatNum"].map(labels)
 
-# Range-Tools (Zoom, Schnellwahl)
-fig.update_xaxes(
-    rangeslider_visible=True,
-    rangeselector=dict(
-        buttons=list([
-            dict(count=7,  label="7T",  step="day",  stepmode="backward"),
-            dict(count=1,  label="1M",  step="month", stepmode="backward"),
-            dict(count=3,  label="3M",  step="month", stepmode="backward"),
-            dict(count=6,  label="6M",  step="month", stepmode="backward"),
-            dict(step="all", label="Gesamt"),
-        ])
-    ),
+df_long = df_plot.reset_index(drop=True).melt(
+    id_vars=["MonatNum","Monat"],
+    var_name="Serie",
+    value_name="kWh"
 )
+
+# Chart: Legende U N T E N + untereinander (eine Spalte)
+fig = alt.Chart(df_long).mark_line(point=True).encode(
+    x=alt.X("MonatNum:O",
+            sort=list(range(1,13)),
+            axis=alt.Axis(title="Monat",
+                          labelExpr='datum(2000, datum.value-1, 1).toLocaleString("de-DE", {month:"short"})')),
+    y=alt.Y("kWh:Q", title="kWh"),
+    color=alt.Color("Serie:N",
+                    legend=alt.Legend(orient="bottom",
+                                      direction="vertical",  # untereinander
+                                      columns=1,
+                                      labelLimit=1000,       # nichts abschneiden
+                                      title=None)),
+    tooltip=["Monat:N","Serie:N", alt.Tooltip("kWh:Q", format=",.0f")]
+).properties(height=380, padding={"bottom": 20})
+
+st.altair_chart(fig, use_container_width=True)
+
 
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
