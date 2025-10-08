@@ -61,6 +61,7 @@ st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWER
 # ----UI Outcome----
 
 st.header("PV-Erzeugung")
+
 # ---- Tageswerte (365 Tage) als Liniendiagramm ----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
