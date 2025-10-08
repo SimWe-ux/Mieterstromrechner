@@ -57,4 +57,6 @@ st.caption("Profiles geladen (Anzahl Werte):")
 st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
 
 # ----UI Outcome----
-df = netzeinspeisung.DataFrame(rng(0).standard_normal((20, 3)), columns=["a", "b", "c"])
+
+st.header("Mieterstrom Ergebnisse")
+
