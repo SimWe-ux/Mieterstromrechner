@@ -84,6 +84,20 @@ df_m = pd.concat(
     axis=1,
 )
 
+# Range-Tools (Zoom, Schnellwahl)
+fig.update_xaxes(
+    rangeslider_visible=True,
+    rangeselector=dict(
+        buttons=list([
+            dict(count=7,  label="7T",  step="day",  stepmode="backward"),
+            dict(count=1,  label="1M",  step="month", stepmode="backward"),
+            dict(count=3,  label="3M",  step="month", stepmode="backward"),
+            dict(count=6,  label="6M",  step="month", stepmode="backward"),
+            dict(step="all", label="Gesamt"),
+        ])
+    ),
+)
+
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
