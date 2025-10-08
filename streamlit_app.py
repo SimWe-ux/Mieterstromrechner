@@ -4,6 +4,7 @@ import model as M
 import profiles as P
 import numpy as np
 import pandas as pd
+imprt plotly.express as px
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -56,8 +57,7 @@ col2.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
-st.caption("Profiles geladen (Anzahl Werte):")
-st.write(len(P.LASTPROFIL_WOHNUNG), len(P.LASTPROFIL_WP), len(P.LASTPROFIL_GEWERBE), len(P.PV_GEWICHT))
+
 
 # ---- Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
