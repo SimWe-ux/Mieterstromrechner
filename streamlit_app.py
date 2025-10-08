@@ -4,7 +4,6 @@ import model as M
 import profiles as P
 import numpy as np
 import pandas as pd
-import altair as alt
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -94,25 +93,6 @@ df_long = df_plot.reset_index(drop=True).melt(
     var_name="Serie",
     value_name="kWh"
 )
-
-# Chart: Legende U N T E N + untereinander (eine Spalte)
-fig = alt.Chart(df_long).mark_line(point=True).encode(
-    x=alt.X("MonatNum:O",
-            sort=list(range(1,13)),
-            axis=alt.Axis(title="Monat",
-                          labelExpr='datum(2000, datum.value-1, 1).toLocaleString("de-DE", {month:"short"})')),
-    y=alt.Y("kWh:Q", title="kWh"),
-    color=alt.Color("Serie:N",
-                    legend=alt.Legend(orient="bottom",
-                                      direction="vertical",  # untereinander
-                                      columns=1,
-                                      labelLimit=1000,       # nichts abschneiden
-                                      title=None)),
-    tooltip=["Monat:N","Serie:N", alt.Tooltip("kWh:Q", format=",.0f")]
-).properties(height=380, padding={"bottom": 20})
-
-st.altair_chart(fig, use_container_width=True)
-
 
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
