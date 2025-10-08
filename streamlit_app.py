@@ -1,3 +1,5 @@
+pip install plotly pandas numpy
+pip install streamlit openpyxl
 import streamlit as st
 import configurations as C
 import model as M
