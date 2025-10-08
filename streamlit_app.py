@@ -81,7 +81,7 @@ df_m = pd.concat(
         feedin_m.rename("Netzeinspeisung [kWh]"),
         grid_m.rename("Netzbezug [kWh]"),
     ],
-    axis=2,
+    axis=1,
 )
 
 st.subheader("Monatswerte – Jahresverlauf")
