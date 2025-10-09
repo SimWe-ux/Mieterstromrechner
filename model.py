@@ -87,6 +87,21 @@ def _einspeise_satz() -> float:
     # Standard: kapazitätsgewichteter Durchschnitt nach EEG-Staffel
     return float(_tiered_avg_einspeise_satz(float(C.pv_kwp)))
 
+def _get(name: str, default):
+    return getattr(C, name, default)
+
+def _preis_pv_kwp() -> float:
+    f = getattr(C, "pv_preis_pro_kwp", None)
+    if callable(f):
+        return float(f(float(C.pv_kwp)))
+    x = float(C.pv_kwp)
+    if x < 10:
+        return float(C.preis_pv_u10_kwp)
+    elif x <= 20:
+        return float(C.preis_pv_10_20_kwp)
+    else:
+        return float(C.preis_pv_o20_kwp)
+
 # ---------- Hauptsimulation ----------
 def simulate_hourly() -> Dict[str, Any]:
     n = 8760
@@ -207,7 +222,7 @@ def simulate_hourly() -> Dict[str, Any]:
             "batt_to_load": batt_to_load,
             "soc": soc,
             "eigenverbrauch": eigenverbrauch,
-            "netzeinspeisung": netzeinspeisung,
+            "spill_after_charge": spill_after_charge,
             "netzbezug": netzbezug,
             "wohnung_series": wohnung_series,
             "wp_series": wp_series,
@@ -252,7 +267,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     # --- Einnahmen ---
     verkauf_pv  = p_pv * (ev_we + ev_ge + ev_wp)             # PV-Verkauf an alle Kunden
     ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)             # Zuschlag auf PV-Mieterstrom
-    einspeise = _tiered_avg_einspeise_satz(float(C.pv_kwp)) * float(S.netzeinspeisung_kwh) # Ø-Vergütung
+    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh) # Ø-Einspeisevergütung
     rest_rev    = p_rest * rest_sum                          # Reststrom (neutral)
 
     einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev
