@@ -24,7 +24,7 @@ preis_pv_u10_kwp: float = 1500.0 # Pv Preis unter 10 kWp
 preis_pv_10_20_kwp: float = 1100.0 # Pv Preis zwischen 10 - 20kWp
 preis_pv_o20_kwp: float = 990.0 # Pv Preis über 20 kWp
 speicherkosten: float  = 500 # Speicherkosten in € 
-reststromkosten: float = 0.35 # Reststromkosten in € 
+reststromkosten: float = 0.32 # Reststromkosten in € 
 pv_stromkosten: float = 0.27 # PVstromksoten in € 
 grundgebuehren: float = 10 # Grundgebühren in € 
 mieterstromzuschlage = 0.0238 # EEG Mieterstromzuschlag in € 
@@ -33,7 +33,7 @@ einspeisevergütung_u10_kwp: float = 0.0786
 einspeisevergütung_o10_kwp: float = 0.0688
 
 def einspeiseverguetung_satz(pv_kwp_value: float) -> float:
-    return einspeisevergütung_u10_kwp if pv_kwp_value <= 10 else einspeisevergütung_10_40_kwp
+    return einspeisevergütung_u10_kwp if pv_kwp_value <= 10 else einspeisevergütung_o10_kwp
 
 # ----Betriebskosten---- 
 abrechnungskosten: float = 70 # Abbrechnungssoftwarekosten 
