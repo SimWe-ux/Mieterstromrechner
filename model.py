@@ -237,9 +237,11 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     # Preise/Parameter
     p_pv   = float(_get("pv_stromkosten", 0.27))         # Verkaufspreis an Mieter/Gewerbe/WP
     p_grid = float(_get("reststromkosten", 0.35))         # Netzstrompreis
-    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat (ein Anschluss, vereinfacht)
+    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat
     ms_z   = float(_get("mieterstromzuschlage", 0.0238))  # €/kWh Mieterstromzuschlag
     eins   = _einspeise_satz()                            # €/kWh Einspeisevergütung
+
+    we_cnt = int(getattr(C, "wohneinheiten", 1))
 
     # Sektorielle Energiemengen
     ev_we  = float(S.eigenverbrauch_wohnung_kwh)
@@ -250,35 +252,45 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     rest_ge = float(S.reststrombedarf_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
     rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
 
-    # Einnahmen
-    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
+    # ---------------- Einnahmen ----------------
+    # Grundgebühren als Erlös je WE (falls so gewollt)
+    grundgebuehr_eur_jahr = 12.0 * gg_mon * we_cnt
 
-    # PV-Stromverkauf (an Wohnungen + optional Gewerbe)
-    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if C.gewerbe_aktiv else 0.0)
-    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
+    # PV-Verkauf an Mieter + Gewerbe + WP (WP ist Mieterstromkunde)
+    verkaufsbasis_kwh = ev_we + ev_ge + ev_wp
+    solarstrom_ap = p_pv * verkaufsbasis_kwh
 
-    # Mieterstromzuschlag auf gesamten EV
-    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
+    # Mieterstromzuschlag auf den verkauften Mieterstrom (inkl. WP)
+    ms_einnahme = ms_z * verkaufsbasis_kwh
 
-    # Einspeisevergütung (stufenabhängig)
-    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
+    # Einspeisevergütung
+    einspeise = eins * float(S.netzeinspeisung_kwh)
 
-    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise)
+    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_einnahme + einspeise)
 
-    # Kosten
+    # ---------------- Kosten ----------------
+    # Zähler: je WE + 1× PV
     zaehler = (
-        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
+        float(_get("zaehlergebuehren_we", 30.0)) * we_cnt
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
+
     abrechnung = float(_get("abrechnungskosten", 70.0))
-    reststrom_kosten = (
-        12.0 * float(_get("grundgebuehren", 10.0))
-        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
-    )
-    kosten = float(zaehler + abrechnung + reststrom_kosten)
 
-    return {"einnahmen_j1": einnahmen, "kosten_j1": kosten, "gewinn_j1": einnahmen - kosten}
+    # Netzseitige Grundgebühr am Anschluss (einmalig)
+    grundgebuehr_einkauf = 12.0 * gg_mon
 
+    # Reststromkosten für WE + GE + WP
+    reststrom_kosten = p_grid * (rest_we + rest_ge + rest_wp)
+
+    kosten = float(zaehler + abrechnung + grundgebuehr_einkauf + reststrom_kosten)
+
+    return {
+        "einnahmen_j1": einnahmen,
+        "kosten_j1": kosten,
+        "gewinn_j1": einnahmen - kosten,
+    }
+    
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
     """Jahr 0 negativ (Invest), dann jährliche Netto-CFs mit Eskalation."""
