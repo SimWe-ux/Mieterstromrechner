@@ -43,6 +43,8 @@ C.soc_start_kwh = 0.20 * C.speicher_kwh
 C.wp_aktiv = bool(has_wp)
 C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 
+# ----OUTPUT----
+
 # ----Eigenverbrauchsquote & Autarkiegard----
 
 sim = M.simulate_hourly() 
@@ -50,12 +52,7 @@ S = sim["summen"]
 
 col1, col2 = st.columns(2)
 col1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-col1.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
-
-col2.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
-col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
-col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
-    
+col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")    
 
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
@@ -93,6 +90,13 @@ df_long = df_plot.reset_index(drop=True).melt(
     var_name="Serie",
     value_name="kWh"
 )
+
+col1, col2 = st.columns(2)
+col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
+col1.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
+col1.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
+col2.metric("Batterie-Ladung:", f"{S.batterie_entladung_kWh:,.0f} kWh")
+
 # ---- Wirtschaftlichkeitsrechnung----
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
