@@ -31,6 +31,7 @@ mieterstromzuschlage = 0.0238 # EEG Mieterstromzuschlag in €
 strompreissteigerung_pa: float = 0.03 # Strompreissteigerung pro Jahr
 einspeisevergütung_u10_kwp: float = 0.0786
 einspeisevergütung_o10_kwp: float = 0.0688
+
 def einspeiseverguetung_satz(pv_kwp_value: float) -> float:
     return einspeisevergütung_u10_kwp if pv_kwp_value <= 10 else einspeisevergütung_10_40_kwp
 
