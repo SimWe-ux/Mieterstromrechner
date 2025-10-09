@@ -237,7 +237,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     # Preise/Parameter
     p_pv   = float(_get("pv_stromkosten", 0.27))         # Verkaufspreis an Mieter/Gewerbe/WP
     p_grid = float(_get("reststromkosten", 0.35))         # Netzstrompreis
-    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat
+    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat (ein Anschluss)
     ms_z   = float(_get("mieterstromzuschlage", 0.0238))  # €/kWh Mieterstromzuschlag
     eins   = _einspeise_satz()                            # €/kWh Einspeisevergütung
 
@@ -253,10 +253,10 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
 
     # ---------------- Einnahmen ----------------
-    # Grundgebühren als Erlös je WE (falls so gewollt)
+    # (optional) Grundgebühr als Erlös je WE – falls so gewollt:
     grundgebuehr_eur_jahr = 12.0 * gg_mon * we_cnt
 
-    # PV-Verkauf an Mieter + Gewerbe + WP (WP ist Mieterstromkunde)
+    # PV-Verkauf an Mieter + Gewerbe + WP (WP ist Mieterstromkunde!)
     verkaufsbasis_kwh = ev_we + ev_ge + ev_wp
     solarstrom_ap = p_pv * verkaufsbasis_kwh
 
@@ -277,7 +277,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
 
     abrechnung = float(_get("abrechnungskosten", 70.0))
 
-    # Netzseitige Grundgebühr am Anschluss (einmalig)
+    # Netzseitige Grundgebühr (ein Anschluss, 1×)
     grundgebuehr_einkauf = 12.0 * gg_mon
 
     # Reststromkosten für WE + GE + WP
@@ -307,53 +307,39 @@ def cashflow_n(jahre: int = 20):
         cf.append(ein * factor - kos * factor)
     return cf
 
-def irr(cashflows) -> float:
-    """IRR via Newton-Verfahren. Gibt float (z. B. 0.081 = 8,1%) zurück."""
-    c = list(map(float, cashflows))
+def irr(cashflows, tol: float = 1e-8) -> float:
+    """Stabile IRR: gibt NaN zurück, wenn kein Vorzeichenwechsel.
+    Sonst Bisektion auf [-0.9999, r_max] mit adaptivem r_max."""
+    cf = np.array(list(map(float, cashflows)), dtype=float)
+
+    # Ohne Vorzeichenwechsel ist IRR nicht definiert
+    if not (np.any(cf > 0) and np.any(cf < 0)):
+        return float("nan")
 
     def npv(rate: float) -> float:
-        return sum(v / ((1.0 + rate) ** i) for i, v in enumerate(c))
+        disc = (1.0 + rate) ** np.arange(cf.size, dtype=float)
+        return float(np.sum(cf / disc))
 
-    r = 0.08
-    for _ in range(100):
-        f = npv(r)
-        df = sum(-i * v / ((1.0 + r) ** (i + 1)) for i, v in enumerate(c[1:], start=1))
-        if abs(df) < 1e-12:
-            break
-        step = f / df
-        r -= step
-        if abs(step) < 1e-8:
-            break
-    return float(r)
+    lo, hi = -0.9999, 1.0   # start bounds
+    f_lo, f_hi = npv(lo), npv(hi)
 
-def payback_years(cashflows) -> float | None:
-    """Erstes Jahr (ggf. mit Nachkommastellen), in dem der kumulierte CF >= 0 wird."""
-    cf = list(map(float, cashflows))
-    cum = cf[0]
-    for y in range(1, len(cf)):
-        prev = cum
-        cum += cf[y]
-        if cum >= 0:
-            return (y - 1) + (0.0 - prev) / cf[y] if cf[y] != 0 else float(y)
-    return None
+    # erweitere obere Schranke bis Vorzeichenwechsel erreicht ist (oder abbrich)
+    k = 0
+    while f_lo * f_hi > 0 and hi < 1e3:  # harte Kappe
+        hi *= 2.0
+        f_hi = npv(hi)
+        k += 1
+        if k > 60:  # Sicherheit
+            return float("nan")
 
-def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
-    capex = float(capex_pv() + capex_speicher())
-    j1 = wirtschaftlichkeit_j1()
-    cf = cashflow_n(jahre=jahre)
-
-    try:
-        irr_pct = irr(cf) * 100.0
-    except Exception:
-        irr_pct = float("nan")
-
-    pb = payback_years(cf)
-
-    return {
-        "capex": capex,
-        "irr_pct": irr_pct,
-        "payback_years": pb,
-        "einnahmen_j1": float(j1.get("einnahmen_j1", 0.0)),
-        "kosten_j1": float(j1.get("kosten_j1", 0.0)),
-        "gewinn_j1": float(j1.get("gewinn_j1", 0.0)),
-    }
+    # Bisection
+    for _ in range(200):
+        mid = (lo + hi) / 2.0
+        f_mid = npv(mid)
+        if abs(f_mid) < tol:
+            return float(mid)
+        if f_lo * f_mid > 0:
+            lo, f_lo = mid, f_mid
+        else:
+            hi, f_hi = mid, f_mid
+    return float((lo + hi) / 2.0)
