@@ -31,45 +31,8 @@ mieterstromzuschlage = 0.0238 # EEG Mieterstromzuschlag in €
 strompreissteigerung_pa: float = 0.03 # Strompreissteigerung pro Jahr
 einspeisevergütung_u10_kwp: float = 0.0786
 einspeisevergütung_o10_kwp: float = 0.0688
-
-def _tiered_avg_einspeise_satz(pv_kwp: float) -> float:
-    """
-    Liefert den kapazitätsgewichteten Durchschnittssatz in €/kWh
-    für die gesamte Anlage gemäß EEG-Staffel (≤10, 10–40, 40–100, >100).
-    Nutzt vorhandene Konfig-Variablen und fällt sinnvoll zurück.
-    """
-
-    # Raten aus configurations.py holen (Fallbacks, falls nicht definiert)
-    r_u10  = getattr(C, "einspeisevergütung_u10_kwp", 0.0786)
-    r_10_40 = getattr(C, "einspeisevergütung_10_40_kwp",
-                      getattr(C, "einspeisevergütung_o10_kwp", 0.0688))
-    r_40_100 = getattr(C, "einspeisevergütung_40_100_kwp", r_10_40)
-    r_o100 = getattr(C, "einspeisevergütung_o100_kwp", r_40_100)
-
-    tiers = [
-        (10.0,     r_u10),    # bis 10 kWp
-        (40.0,     r_10_40),  # >10 bis 40 kWp
-        (100.0,    r_40_100), # >40 bis 100 kWp
-        (float("inf"), r_o100)  # >100 kWp
-    ]
-
-    remaining = float(pv_kwp)
-    prev_cap = 0.0
-    weighted_sum = 0.0
-    total_cap = max(float(pv_kwp), 1e-12)
-
-    for cap, rate in tiers:
-        band_width = cap - prev_cap
-        take = max(min(remaining, band_width), 0.0)
-        if take > 0:
-            weighted_sum += take * float(rate)
-            remaining -= take
-        prev_cap = cap
-        if remaining <= 0:
-            break
-
-    return weighted_sum / total_cap
- 
+def einspeiseverguetung_satz(pv_kwp_value: float) -> float:
+    return einspeisevergütung_u10_kwp if pv_kwp_value <= 10 else einspeisevergütung_10_40_kwp
 
 # ----Betriebskosten---- 
 abrechnungskosten: float = 70 # Abbrechnungssoftwarekosten 
