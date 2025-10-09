@@ -101,6 +101,8 @@ col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
+st.markdown("***")
+
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.subheader("Wirtschaftlichkeit")
