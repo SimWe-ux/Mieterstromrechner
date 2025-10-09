@@ -320,16 +320,16 @@ def irr(cashflows, tol: float = 1e-8) -> float:
         disc = (1.0 + rate) ** np.arange(cf.size, dtype=float)
         return float(np.sum(cf / disc))
 
-    lo, hi = -0.9999, 1.0   # start bounds
+    lo, hi = -0.9999, 1.0   
     f_lo, f_hi = npv(lo), npv(hi)
 
     # erweitere obere Schranke bis Vorzeichenwechsel erreicht ist (oder abbrich)
     k = 0
-    while f_lo * f_hi > 0 and hi < 1e3:  # harte Kappe
+    while f_lo * f_hi > 0 and hi < 1e3:  
         hi *= 2.0
         f_hi = npv(hi)
         k += 1
-        if k > 60:  # Sicherheit
+        if k > 60:  
             return float("nan")
 
     # Bisection
