@@ -104,6 +104,17 @@ col1.metric("Eigenverbrauch im Jahr", f"{S.eigenverbrauch_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
+with st.container(border=True):
+    st.subheader("Jahreswerte im Überblick")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
+        st.metric("Eigenverbrauch im Jahr", f"{S.eigenverbrauch_kwh:,.0f} kWh")
+    with col2:
+        st.metric("Netzeinspeisung", f"{S.netzeinspeisung_kwh:,.0f} kWh")
+        st.metric("Netzbezug", f"{S.netzbezug_kwh:,.0f} kWh")
+        
 st.markdown("***")
 
 # ---- Wirtschaftlichkeitsrechnung----
