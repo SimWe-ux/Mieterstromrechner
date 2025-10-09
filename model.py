@@ -8,7 +8,7 @@ Excel-Logik (8760h) in reinem Python.
 - Wirtschaftlichkeit (Jahr 1), Cashflow, IRR
 
 Abhängigkeiten:
-- Configurations.py (deine Variablennamen)
+- configurations.py (deine Variablennamen)
 - profiles.py       (8760-Arrays: LASTPROFIL_WOHNUNG, LASTPROFIL_WP, LASTPROFIL_GEWERBE, PV_GEWICHT)
 """
 
@@ -44,25 +44,20 @@ class Ergebnisse:
 
 # ---------- kleine Helper ----------
 def _get(name: str, default):
-    """Robustes Lesen aus Config (unterstützt ggf. Alias-Namen)."""
     return getattr(C, name, default)
 
 def _einspeise_satz() -> float:
-    # bevorzugt deine Funktion (mit Umlaut-Variablen)
     f = getattr(C, "einspeiseverguetung_satz", None)
     if callable(f):
         return float(f(float(C.pv_kwp)))
-    # Fallback über Variablen
     if hasattr(C, "einspeisevergütung_u10_kwp") and hasattr(C, "einspeisevergütung_o10_kwp"):
         return float(C.einspeisevergütung_u10_kwp if C.pv_kwp <= 10 else C.einspeisevergütung_o10_kwp)
-    # letzte Sicherung
     return 0.0688
 
 def _preis_pv_kwp() -> float:
     f = getattr(C, "pv_preis_pro_kwp", None)
     if callable(f):
         return float(f(float(C.pv_kwp)))
-    # Falls Funktion fehlt, manuell staffeln
     x = float(C.pv_kwp)
     if x < 10:
         return float(C.preis_pv_u10_kwp)
@@ -78,38 +73,30 @@ def simulate_hourly() -> Dict[str, Any]:
     G = np.array(LASTPROFIL_GEWERBE[:n], dtype=float)
     Q = np.array(PV_GEWICHT[:n], dtype=float)
 
-    # Normierungen (bei inaktiven Sektoren Dummy-Summen)
     sum_P = float(P.sum())
     sum_S = float(S.sum()) if C.wp_aktiv else 1.0
     sum_G = float(G.sum()) if C.gewerbe_aktiv else 1.0
 
-    # PV-Gewichte mit Exponent
     R = np.power(Q, float(C.pv_form_exponent))
     sum_R = float(R.sum())
 
-    # Jahresmengen aus Config
     wohnung_total = float(C.wohnungen_verbrauch_kwh)
     wp_total = float(C.wp_verbrauch_kwh) if C.wp_aktiv else 0.0
     gew_total = float(C.gewerbe_verbrauch_kwh) if C.gewerbe_aktiv else 0.0
 
-    # Stündliche Lasten je Sektor
-    wohnung_series = wohnung_total * (P / sum_P)
-    wp_series = (wp_total * (S / sum_S)) if C.wp_aktiv else np.zeros(n)
-    gewerbe_series = (gew_total * (G / sum_G)) if C.gewerbe_aktiv else np.zeros(n)
+    wohnung_series  = wohnung_total * (P / sum_P)
+    wp_series       = (wp_total * (S / sum_S)) if C.wp_aktiv else np.zeros(n)
+    gewerbe_series  = (gew_total * (G / sum_G)) if C.gewerbe_aktiv else np.zeros(n)
 
-    # Gesamtlast
     gesamtverbrauch = wohnung_series + wp_series + gewerbe_series
 
-    # PV-Erzeugung: 950 kWh/kWp*a (Excel-typisch), verteilt über R/sum_R
     pv_annual_yield = 950.0 * float(C.pv_kwp)
     pv_prod = pv_annual_yield * (R / sum_R)
 
-    # Direktverbrauch / Überschuss / Defizit
-    direkt = np.minimum(gesamtverbrauch, pv_prod)
-    ueberschuss = np.maximum(pv_prod - gesamtverbrauch, 0.0)
-    defizit = np.maximum(gesamtverbrauch - pv_prod, 0.0)
+    direkt     = np.minimum(gesamtverbrauch, pv_prod)
+    ueberschuss= np.maximum(pv_prod - gesamtverbrauch, 0.0)
+    defizit    = np.maximum(gesamtverbrauch - pv_prod, 0.0)
 
-    # Batterie-Modell (symmetrisch via sqrt(eta))
     eff = float(C.wirkungsgrad_roundtrip)
     rt = sqrt(eff)
     soc = np.zeros(n, dtype=float)
@@ -117,68 +104,55 @@ def simulate_hourly() -> Dict[str, Any]:
     spill_after_charge = np.zeros(n, dtype=float)
     discharge = np.zeros(n, dtype=float)
     batt_to_load = np.zeros(n, dtype=float)
-    standby_kwh = float(C.standby_watt) / 1000.0  # W -> kWh pro Stunde
+    standby_kwh = float(C.standby_watt) / 1000.0
 
     for i in range(n):
         prev_soc = soc[i - 1] if i > 0 else float(C.soc_start_kwh)
 
-        # Laden (AC -> Batt), begrenzt durch Ladeleistung und Speicherrest
-        # H = MIN( MIN(F, Ladeleistung)*eff , MAX(Speicher - prev_soc, 0) )
         charge[i] = min(
             min(ueberschuss[i], float(C.ladeleistung)) * eff,
             max(float(C.speicher_kwh) - prev_soc, 0.0),
         )
 
-        # Rest-Überschuss nach Laden (zur Einspeisung)
-        # I = F - (H / sqrt(eff))
         spill_after_charge[i] = ueberschuss[i] - (charge[i] / rt)
 
-        # Entladen (Batt -> AC), begrenzt durch Entladeleistung und verfüg. Energie
-        # J = MIN( MIN(G, Entladeleistung)/sqrt(eff), prev_soc + H )
         discharge[i] = min(
             min(defizit[i], float(C.entladeleistung)) / rt,
             prev_soc + charge[i],
         )
 
-        # Batteriestrom zur Last (AC)
-        # K = J * sqrt(eff)
         batt_to_load[i] = discharge[i] * rt
 
-        # SOC-Update (inkl. Standby pro Stunde)
-        # L = MAX( (prev + H) - J - standby, 0 )
         soc[i] = max((prev_soc + charge[i]) - discharge[i] - standby_kwh, 0.0)
 
-    # Salden
     eigenverbrauch = direkt + batt_to_load
     netzeinspeisung = spill_after_charge
     netzbezug = defizit - batt_to_load
 
-    # Aufteilung EV proportional zur Momentanlast je Sektor
     with np.errstate(divide="ignore", invalid="ignore"):
         share_wohnung = np.divide(wohnung_series, np.maximum(gesamtverbrauch, 1e-12))
-        share_wp = np.divide(wp_series, np.maximum(gesamtverbrauch, 1e-12))
-        share_gewerbe = np.divide(gewerbe_series, np.maximum(gesamtverbrauch, 1e-12))
+        share_wp      = np.divide(wp_series,       np.maximum(gesamtverbrauch, 1e-12))
+        share_gewerbe = np.divide(gewerbe_series,  np.maximum(gesamtverbrauch, 1e-12))
 
     pv_to_wohnung = eigenverbrauch * share_wohnung
-    pv_to_wp = eigenverbrauch * share_wp
+    pv_to_wp      = eigenverbrauch * share_wp
     pv_to_gewerbe = eigenverbrauch * share_gewerbe
 
-    # Summen/KPIs
     jahresverbrauch = float(gesamtverbrauch.sum())
-    pv_erzeugung = float(pv_prod.sum())
-    eigenv_sum = float(eigenverbrauch.sum())
+    pv_erzeugung    = float(pv_prod.sum())
+    eigenv_sum      = float(eigenverbrauch.sum())
     einspeisung_sum = float(netzeinspeisung.sum())
-    netzbezug_sum = float(netzbezug.sum())
+    netzbezug_sum   = float(netzbezug.sum())
 
     ev_quote = (eigenv_sum / pv_erzeugung) if pv_erzeugung > 0 else 0.0
     autarkie = (eigenv_sum / jahresverbrauch) if jahresverbrauch > 0 else 0.0
 
     ev_wohnung = float(pv_to_wohnung.sum())
-    ev_wp = float(pv_to_wp.sum())
+    ev_wp      = float(pv_to_wp.sum())
     ev_gewerbe = float(pv_to_gewerbe.sum())
 
     rest_wohnung = float(wohnung_series.sum() - ev_wohnung)
-    rest_wp = float(wp_series.sum() - ev_wp)
+    rest_wp      = float(wp_series.sum()      - ev_wp)
     rest_gewerbe = float(gewerbe_series.sum() - ev_gewerbe)
 
     out = Ergebnisse(
@@ -205,7 +179,8 @@ def simulate_hourly() -> Dict[str, Any]:
             "ueberschuss": ueberschuss,
             "defizit": defizit,
             "charge": charge,
-            "spill_after_charge": spill_after_charge,
+            # (Originalzustand) – hier stand die nach dem Fix geänderte Zeile:
+            "spill_after_charge": netzeinspeisung,
             "discharge": discharge,
             "batt_to_load": batt_to_load,
             "soc": soc,
@@ -227,76 +202,44 @@ def capex_pv() -> float:
     return float(C.pv_kwp) * _preis_pv_kwp()
 
 def capex_speicher() -> float:
-    # deine Bezeichnung: 'speicherkosten' = €/kWh
     return float(C.speicher_kwh) * float(_get("speicherkosten", 500.0))
 
+# ---------- Wirtschaftlichkeit Jahr 1 (Original-Logik) ----------
 def wirtschaftlichkeit_j1() -> Dict[str, float]:
     sim = simulate_hourly()
     S: Ergebnisse = sim["summen"]
 
-    # Preise/Parameter
-    p_pv   = float(_get("pv_stromkosten", 0.27))         # Verkaufspreis an Mieter/Gewerbe/WP
-    p_grid = float(_get("reststromkosten", 0.35))         # Netzstrompreis
-    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat (ein Anschluss)
-    ms_z   = float(_get("mieterstromzuschlage", 0.0238))  # €/kWh Mieterstromzuschlag
-    eins   = _einspeise_satz()                            # €/kWh Einspeisevergütung
+    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
 
-    we_cnt = int(getattr(C, "wohneinheiten", 1))
+    # Verkauf NUR an Wohnungen (+ optional GE), WP NICHT enthalten
+    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if getattr(C, "gewerbe_aktiv", False) else 0.0)
+    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
 
-    # Sektorielle Energiemengen
-    ev_we  = float(S.eigenverbrauch_wohnung_kwh)
-    ev_ge  = float(S.eigenverbrauch_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
-    ev_wp  = float(S.eigenverbrauch_wp_kwh)       if getattr(C, "wp_aktiv", False)       else 0.0
+    # Zuschlag auf ges. EV (inkl. WP)
+    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
 
-    rest_we = float(S.reststrombedarf_wohnung_kwh)
-    rest_ge = float(S.reststrombedarf_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
-    rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
+    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
 
-    # ---------------- Einnahmen ----------------
-    # (optional) Grundgebühr als Erlös je WE – falls so gewollt:
-    grundgebuehr_eur_jahr = 12.0 * gg_mon * we_cnt
+    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise)
 
-    # PV-Verkauf an Mieter + Gewerbe + WP (WP ist Mieterstromkunde!)
-    verkaufsbasis_kwh = ev_we + ev_ge + ev_wp
-    solarstrom_ap = p_pv * verkaufsbasis_kwh
-
-    # Mieterstromzuschlag auf den verkauften Mieterstrom (inkl. WP)
-    ms_einnahme = ms_z * verkaufsbasis_kwh
-
-    # Einspeisevergütung
-    einspeise = eins * float(S.netzeinspeisung_kwh)
-
-    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_einnahme + einspeise)
-
-    # ---------------- Kosten ----------------
-    # Zähler: je WE + 1× PV
+    # Kosten: Zähler (WE + 1x PV), Abrechnung, Reststrom NUR Wohnungen (+ Grundgebühr einkauf)
     zaehler = (
-        float(_get("zaehlergebuehren_we", 30.0)) * we_cnt
+        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
-
     abrechnung = float(_get("abrechnungskosten", 70.0))
+    reststrom_kosten = (
+        12.0 * float(_get("grundgebuehren", 10.0))
+        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
+    )
+    kosten = float(zaehler + abrechnung + reststrom_kosten)
 
-    # Netzseitige Grundgebühr (ein Anschluss, 1×)
-    grundgebuehr_einkauf = 12.0 * gg_mon
+    return {"einnahmen_j1": einnahmen, "kosten_j1": kosten, "gewinn_j1": einnahmen - kosten}
 
-    # Reststromkosten für WE + GE + WP
-    reststrom_kosten = p_grid * (rest_we + rest_ge + rest_wp)
-
-    kosten = float(zaehler + abrechnung + grundgebuehr_einkauf + reststrom_kosten)
-
-    return {
-        "einnahmen_j1": einnahmen,
-        "kosten_j1": kosten,
-        "gewinn_j1": einnahmen - kosten,
-    }
-    
-# ---------- Cashflow & IRR ----------
+# ---------- Cashflow & IRR (Original-Variante) ----------
 def cashflow_n(jahre: int = 20):
-    """Jahr 0 negativ (Invest), dann jährliche Netto-CFs mit Eskalation."""
     invest = float(capex_pv() + capex_speicher())
     j1 = wirtschaftlichkeit_j1()
-    # robust lesen:
     ein = float(j1.get("einnahmen_j1", 0.0))
     kos = float(j1.get("kosten_j1", 0.0))
     escal = float(_get("strompreissteigerung_pa", 0.03))
@@ -307,39 +250,46 @@ def cashflow_n(jahre: int = 20):
         cf.append(ein * factor - kos * factor)
     return cf
 
-def irr(cashflows, tol: float = 1e-8) -> float:
-    """Stabile IRR: gibt NaN zurück, wenn kein Vorzeichenwechsel.
-    Sonst Bisektion auf [-0.9999, r_max] mit adaptivem r_max."""
-    cf = np.array(list(map(float, cashflows)), dtype=float)
-
-    # Ohne Vorzeichenwechsel ist IRR nicht definiert
-    if not (np.any(cf > 0) and np.any(cf < 0)):
-        return float("nan")
-
+def irr(cashflows) -> float:
+    c = list(map(float, cashflows))
     def npv(rate: float) -> float:
-        disc = (1.0 + rate) ** np.arange(cf.size, dtype=float)
-        return float(np.sum(cf / disc))
+        return sum(v / ((1.0 + rate) ** i) for i, v in enumerate(c))
+    r = 0.08
+    for _ in range(100):
+        f = npv(r)
+        df = sum(-i * v / ((1.0 + r) ** (i + 1)) for i, v in enumerate(c[1:], start=1))
+        if abs(df) < 1e-12:
+            break
+        step = f / df
+        r -= step
+        if abs(step) < 1e-8:
+            break
+    return float(r)
 
-    lo, hi = -0.9999, 1.0   
-    f_lo, f_hi = npv(lo), npv(hi)
+def payback_years(cashflows) -> float | None:
+    cf = list(map(float, cashflows))
+    cum = cf[0]
+    for y in range(1, len(cf)):
+        prev = cum
+        cum += cf[y]
+        if cum >= 0:
+            return (y - 1) + (0.0 - prev) / cf[y] if cf[y] != 0 else float(y)
+    return None
 
-    # erweitere obere Schranke bis Vorzeichenwechsel erreicht ist (oder abbrich)
-    k = 0
-    while f_lo * f_hi > 0 and hi < 1e3:  
-        hi *= 2.0
-        f_hi = npv(hi)
-        k += 1
-        if k > 60:  
-            return float("nan")
-
-    # Bisection
-    for _ in range(200):
-        mid = (lo + hi) / 2.0
-        f_mid = npv(mid)
-        if abs(f_mid) < tol:
-            return float(mid)
-        if f_lo * f_mid > 0:
-            lo, f_lo = mid, f_mid
-        else:
-            hi, f_hi = mid, f_mid
-    return float((lo + hi) / 2.0)
+def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
+    capex = float(capex_pv() + capex_speicher())
+    j1 = wirtschaftlichkeit_j1()
+    cf = cashflow_n(jahre=jahre)
+    try:
+        irr_pct = irr(cf) * 100.0
+    except Exception:
+        irr_pct = float("nan")
+    pb = payback_years(cf)
+    return {
+        "capex": capex,
+        "irr_pct": irr_pct,
+        "payback_years": pb,
+        "einnahmen_j1": float(j1.get("einnahmen_j1", 0.0)),
+        "kosten_j1": float(j1.get("kosten_j1", 0.0)),
+        "gewinn_j1": float(j1.get("gewinn_j1", 0.0)),
+    }
