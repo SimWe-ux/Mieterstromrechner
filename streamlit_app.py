@@ -97,4 +97,15 @@ df_long = df_plot.reset_index(drop=True).melt(
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
+k = M.wirtschaftlichkeit_kpis(jahre=20)
+
+st.subheader("Wirtschaftlichkeit")
+c1, c2 = st.columns(2)
+c1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+c1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
+c1.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
+
+c2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+c2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
+c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
