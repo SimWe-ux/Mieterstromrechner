@@ -235,6 +235,36 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     sim = simulate_hourly()
     S: Ergebnisse = sim["summen"]
 
+def payback_years(cashflows) -> float | None:
+    """Erstes Jahr (ggf. mit Nachkommastellen), in dem der kumulierte Cashflow >= 0 wird.
+    Gibt None zurück, wenn innerhalb des Horizonts kein Break-even erreicht wird."""
+    cf = list(map(float, cashflows))
+    cum = cf[0]
+    for y in range(1, len(cf)):
+        prev = cum
+        cum += cf[y]
+        if cum >= 0:
+            return (y - 1) + (0.0 - prev) / cf[y] if cf[y] != 0 else float(y)
+    return None
+
+def wirtschaftlichkeit_kpis(jahre: int = 20) -> dict:
+    capex = capex_pv() + capex_speicher()
+    j1 = wirtschaftlichkeit_j1()
+    cf = cashflow_n(jahre=jahre)
+    try:
+        irr_pct = irr(cf) * 100.0
+    except Exception:
+        irr_pct = float("nan")
+    pb = payback_years(cf)
+    return {
+        "capex": capex,
+        "irr_pct": irr_pct,
+        "payback_years": pb,
+        "einnahmen_j1": j1["einnahmen_j1"],
+        "kosten_j1": j1["kosten_j1"],
+        "gewinn_j1": j1["gewinn_j1"],
+    }
+
     # Einnahmen
     grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
 
