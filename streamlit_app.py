@@ -93,7 +93,7 @@ df_long = df_plot.reset_index(drop=True).melt(
     var_name="Serie",
     value_name="kWh"
 )
----- Wirtschaftlichkeitsrechnung----
+# ---- Wirtschaftlichkeitsrechnung----
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
