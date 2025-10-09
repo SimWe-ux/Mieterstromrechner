@@ -208,7 +208,7 @@ def simulate_hourly() -> Dict[str, Any]:
         reststrombedarf_gewerbe_kwh=rest_gewerbe,
     )
 
-  return {
+      return {
         "reihen": {
             "gesamtverbrauch": gesamtverbrauch,
             "pv_prod": pv_prod,
@@ -231,7 +231,7 @@ def simulate_hourly() -> Dict[str, Any]:
             "pv_to_gewerbe": pv_to_gewerbe,
         },
         "summen": out,
-    }
+        }
 
 
 # ---------- CAPEX ----------
