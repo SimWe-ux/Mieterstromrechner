@@ -99,7 +99,6 @@ col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
-k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.subheader("Wirtschaftlichkeit")
 
 c1, c2 = st.columns(2)
