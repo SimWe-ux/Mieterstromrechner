@@ -106,7 +106,7 @@ with st.container(border=True):
         st.metric("Netzeinspeisung", f"{S.netzeinspeisung_kwh:,.0f} kWh")
         st.metric("Netzbezug", f"{S.netzbezug_kwh:,.0f} kWh")
 
-with st.expander: 
+with st.expander("Weitere Ergebnisse"): 
     col1, col2 = st.colums(2)
 
     with col1: 
