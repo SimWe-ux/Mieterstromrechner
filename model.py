@@ -205,7 +205,7 @@ def simulate_hourly() -> Dict[str, Any]:
             "ueberschuss": ueberschuss,
             "defizit": defizit,
             "charge": charge,
-            "spill_after_charge": netzeinspeisung,
+            "spill_after_charge": spill_after_charge,
             "discharge": discharge,
             "batt_to_load": batt_to_load,
             "soc": soc,
