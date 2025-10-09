@@ -43,27 +43,41 @@ class Ergebnisse:
     reststrombedarf_gewerbe_kwh: float
 
 # ---------- kleine Helper ----------
-def _get(name: str, default):
-    return getattr(C, name, default)
+def _tiered_avg_einspeise_satz(pv_kwp: float) -> float:
+    """
+    Kapazitätsgewichteter Durchschnittssatz (€/kWh) über Staffel:
+    ≤10 kWp, 10–40 kWp, 40–100 kWp, >100 kWp.
+    Nutzt vorhandene Variablen aus configurations.py und hat sinnvolle Fallbacks.
+    """
+    r_u10     = getattr(C, "einspeisevergütung_u10_kwp", 0.0786)
+    r_10_40   = getattr(C, "einspeisevergütung_10_40_kwp",
+                        getattr(C, "einspeisevergütung_o10_kwp", 0.0688))
+    r_40_100  = getattr(C, "einspeisevergütung_40_100_kwp", r_10_40)
+    r_o100    = getattr(C, "einspeisevergütung_o100_kwp",  r_40_100)
 
-def _einspeise_satz() -> float:
-    f = getattr(C, "einspeiseverguetung_satz", None)
-    if callable(f):
-        return float(f(float(C.pv_kwp)))
-    if hasattr(C, "einspeisevergütung_u10_kwp") and hasattr(C, "einspeisevergütung_o10_kwp"):
-        return float(C.einspeisevergütung_u10_kwp if C.pv_kwp <= 10 else C.einspeisevergütung_o10_kwp)
-    return 0.0688
+    tiers = [
+        (10.0,        r_u10),     # bis 10
+        (40.0,        r_10_40),   # >10–40
+        (100.0,       r_40_100),  # >40–100
+        (float("inf"), r_o100),   # >100
+    ]
 
-def _preis_pv_kwp() -> float:
-    f = getattr(C, "pv_preis_pro_kwp", None)
-    if callable(f):
-        return float(f(float(C.pv_kwp)))
-    x = float(C.pv_kwp)
-    if x < 10:
-        return float(C.preis_pv_u10_kwp)
-    elif x <= 20:
-        return float(C.preis_pv_10_20_kwp)
-    return float(C.preis_pv_o20_kwp)
+    remaining = float(pv_kwp)
+    prev_cap = 0.0
+    weighted = 0.0
+    total    = max(float(pv_kwp), 1e-12)
+
+    for cap, rate in tiers:
+        span = cap - prev_cap
+        take = max(min(remaining, span), 0.0)
+        if take > 0:
+            weighted += take * float(rate)
+            remaining -= take
+        prev_cap = cap
+        if remaining <= 0:
+            break
+
+    return weighted / total
 
 # ---------- Hauptsimulation ----------
 def simulate_hourly() -> Dict[str, Any]:
