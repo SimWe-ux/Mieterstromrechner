@@ -212,7 +212,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
 
     # Verkauf NUR an Wohnungen (+ optional GE), WP NICHT enthalten
-    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if getattr(C, "gewerbe_aktiv", False) else 0.0)
+    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_wärmepumpe_kwh if getattr(C, "wärmepumpe_aktiv", False) else 0.0) + (S.eigenverbrauch_gewerbe_kwh if getattr(C, "gewerbe_aktiv", False) else 0.0)
     solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
 
     # Zuschlag auf ges. EV (inkl. WP)
