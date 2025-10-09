@@ -45,9 +45,8 @@ class Ergebnisse:
 # ---------- kleine Helper ----------
 def _tiered_avg_einspeise_satz(pv_kwp: float) -> float:
     """
-    Kapazitätsgewichteter Durchschnittssatz (€/kWh) über Staffel:
-    ≤10 kWp, 10–40 kWp, 40–100 kWp, >100 kWp.
-    Nutzt vorhandene Variablen aus configurations.py und hat sinnvolle Fallbacks.
+    Kapazitätsgewichteter Durchschnittssatz (€/kWh) über EEG-Staffeln.
+    Nutzt Werte aus configurations.py; fällt auf vorhandene Sätze zurück.
     """
     r_u10     = getattr(C, "einspeisevergütung_u10_kwp", 0.0786)
     r_10_40   = getattr(C, "einspeisevergütung_10_40_kwp",
@@ -78,6 +77,15 @@ def _tiered_avg_einspeise_satz(pv_kwp: float) -> float:
             break
 
     return weighted / total
+    
+def _einspeise_satz() -> float:
+    # Eigene Funktion aus configurations.py nur nutzen, wenn explizit gewünscht
+    f = getattr(C, "einspeiseverguetung_satz", None)
+    if callable(f) and bool(getattr(C, "use_custom_einspeise_func", False)):
+        return float(f(float(C.pv_kwp)))
+
+    # Standard: kapazitätsgewichteter Durchschnitt nach EEG-Staffel
+    return float(_tiered_avg_einspeise_satz(float(C.pv_kwp)))
 
 # ---------- Hauptsimulation ----------
 def simulate_hourly() -> Dict[str, Any]:
