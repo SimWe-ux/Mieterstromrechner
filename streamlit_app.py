@@ -104,9 +104,9 @@ col1.metric("Eigenverbrauch im Jahr", f"{S.eigenverbrauch_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
-with st.container(border=True):
-    st.subheader("Jahreswerte im Überblick")
+st.subheader("Jahreswerte im Überblick")
 
+with st.container(border=True):
     col1, col2 = st.columns(2)
     with col1:
         st.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
