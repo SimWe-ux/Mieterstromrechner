@@ -235,9 +235,9 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     S: Ergebnisse = sim["summen"]
 
     # Preise/Parameter
-    p_pv   = float(_get("pv_stromkosten", 0.27))         # Verkaufspreis an Mieter/Gewerbe
+    p_pv   = float(_get("pv_stromkosten", 0.27))         # Verkaufspreis an Mieter/Gewerbe/WP
     p_grid = float(_get("reststromkosten", 0.35))         # Netzstrompreis
-    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat (ein Vertrag vereinfacht)
+    gg_mon = float(_get("grundgebuehren", 10.0))          # €/Monat (ein Anschluss, vereinfacht)
     ms_z   = float(_get("mieterstromzuschlage", 0.0238))  # €/kWh Mieterstromzuschlag
     eins   = _einspeise_satz()                            # €/kWh Einspeisevergütung
 
@@ -250,46 +250,40 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     rest_ge = float(S.reststrombedarf_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
     rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
 
-    # Einnahmen:
-    # 1) Verkauf PV-Strom an Wohnungen (+ optional Gewerbe)
-    verkauf_mieter_gewerbe = p_pv * (ev_we + ev_ge)
+    # ---------------- Einnahmen ----------------
+    # PV-Verkauf an Wohnungen + Gewerbe + WP
+    verkauf_ev = p_pv * (ev_we + ev_ge + ev_wp)
 
-    # 2) Mieterstromzuschlag NUR auf Mieter/Gewerbe (nicht WP)
-    ms_einnahme = ms_z * (ev_we + ev_ge)
+    # Mieterstromzuschlag auf ALLES, was als Mieterstrom verkauft wird (inkl. WP)
+    ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)
 
-    # 3) Einspeisevergütung
+    # Einspeisevergütung
     einspeise = eins * float(S.netzeinspeisung_kwh)
 
-    # 4) Einsparung durch WP-Eigenverbrauch (vermeideter Netzbezug)
-    verkauf_wp = p_pv * ev_wp
-    
-    # 5) Grundgebühren (z. B. Mess-/Abrechnungsgrundgebühr) als Einnahmen NICHT sinnvoll;
-    #    in deinem bisherigen Modell war die "Grundgebühr" bei den Kosten – das bleibt so.
+    einnahmen = float(verkauf_ev + ms_einnahme + einspeise)
 
-    einnahmen = verkauf_mieter_gewerbe + ms_einnahme + einspeise + verkauf_wp
-
-    # Kosten:
-    # 1) Zählergebühren (WE-weise) + PV-Zähler
+    # ---------------- Kosten ----------------
+    # Zähler (WE-weise) + 1× PV-Zähler
     zaehler = (
         float(_get("zaehlergebuehren_we", 30.0)) * int(getattr(C, "wohneinheiten", 1))
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
-    # 2) Abrechnungskosten
-    abrechnung = float(_get("abrechnungskosten", 70.0))
 
-    # 3) Grundgebühr (ein Anschluss – vereinfacht)
+    # Abrechnung + Grundgebühr (ein Anschluss, vereinfacht)
+    abrechnung = float(_get("abrechnungskosten", 70.0))
     grundgebuehr_eur_jahr = 12.0 * gg_mon
 
-    # 4) Reststromkosten für ALLE Sektoren (WE, GE, WP)
+    # Reststromkosten für WE + GE + WP
     reststrom_kosten = p_grid * (rest_we + rest_ge + rest_wp)
 
-    kosten = zaehler + abrechnung + grundgebuehr_eur_jahr + reststrom_kosten
+    kosten = float(zaehler + abrechnung + grundgebuehr_eur_jahr + reststrom_kosten)
 
     return {
-        "einnahmen_j1": float(einnahmen),
-        "kosten_j1": float(kosten),
-        "gewinn_j1": float(einnahmen - kosten),
+        "einnahmen_j1": einnahmen,
+        "kosten_j1": kosten,
+        "gewinn_j1": einnahmen - kosten,
     }
+
 
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
