@@ -105,6 +105,16 @@ with st.container(border=True):
     with col2:
         st.metric("Netzeinspeisung", f"{S.netzeinspeisung_kwh:,.0f} kWh")
         st.metric("Netzbezug", f"{S.netzbezug_kwh:,.0f} kWh")
+
+with st.expander: 
+    col1, col2 = st.colums(2)
+
+    with col1: 
+        st.metric("Eigenverbrauch Wohungen", f"{S.we_eigenverbrauch_kwh:,.0f} kWh")
+        st.metric("Eigenverbracuh Gewerbe", f"{S.ge_eigenverbrauch_kwh:,.0f} kWh")
+    with col2: 
+        st.metric("Eigenverbrauch Wohungen", f"{S.we_eigenverbrauch_kwh:,.0f} kWh")
+        st.metric("Eigenverbracuh Gewerbe", f"{S.ge_eigenverbrauch_kwh:,.0f} kWh")
         
 st.markdown("***")
 
