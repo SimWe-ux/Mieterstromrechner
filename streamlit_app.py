@@ -98,7 +98,7 @@ st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
 container = st.container(border=True)
-container.write( k = M.wirtschaftlichkeit_kpis(jahre=20)
+container.write("k = M.wirtschaftlichkeit_kpis(jahre=20)
 
     st.subheader("Wirtschaftlichkeit")
     c1, c2 = st.columns(2)
@@ -108,6 +108,6 @@ container.write( k = M.wirtschaftlichkeit_kpis(jahre=20)
 
     c2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
     c2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+    c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")"
                 )
 
