@@ -94,6 +94,8 @@ df_long = df_plot.reset_index(drop=True).melt(
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
+st.subheader("Jahreswerte im Überblick")
+
 col1, col2 = st.columns(2)
 col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
 col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
