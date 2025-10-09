@@ -133,3 +133,5 @@ df_amort = pd.DataFrame({
 st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
+st.markdown("***")
+
