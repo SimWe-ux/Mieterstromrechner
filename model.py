@@ -209,32 +209,41 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     sim = simulate_hourly()
     S: Ergebnisse = sim["summen"]
 
-    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
+    # PV-Eigenverbrauch je Sektor
+    ev_we = float(S.eigenverbrauch_wohnung_kwh)
+    ev_ge = float(S.eigenverbrauch_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
+    ev_wp = float(S.eigenverbrauch_wp_kwh)       if getattr(C, "wp_aktiv", False)       else 0.0
 
-    # Verkauf an Wohnungen (+ optional GE) (+ optional WP)
-    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_wärmepumpe_kwh if getattr(C, "wp_aktiv", False) else 0.0) + (S.eigenverbrauch_gewerbe_kwh if getattr(C, "gewerbe_aktiv", False) else 0.0)
-    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
+    # Reststrommengen 
+    rest_we = float(S.reststrombedarf_wohnung_kwh)
+    rest_ge = float(S.reststrombedarf_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
+    rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
+    rest_sum = rest_we + rest_ge + rest_wp
 
-    # Zuschlag auf ges. EV (inkl. WP)
-    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
+    # --- Einnahmen ---
+    verkauf_pv  = p_pv * (ev_we + ev_ge + ev_wp)             # PV-Verkauf an alle Kunden
+    ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)             # Zuschlag auf PV-Mieterstrom
+    einspeise   = eins  * float(S.netzeinspeisung_kwh)
+    rest_rev    = p_rest * rest_sum                          # Reststrom (neutral)
 
-    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
+    einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev
 
-    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise + reststrom_kosten)
-
-    # Kosten: Zähler (WE + 1x PV), Abrechnung, Reststrom NUR Wohnungen (+ Grundgebühr einkauf)
+    # --- Kosten ---
     zaehler = (
-        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
+        float(_get("zaehlergebuehren_we", 30.0)) * int(getattr(C, "wohneinheiten", 1))
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
-    abrechnung = float(_get("abrechnungskosten", 70.0))
-    reststrom_kosten = (
-        12.0 * float(_get("grundgebuehren", 10.0))
-        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
-    )
-    kosten = float(zaehler + abrechnung + reststrom_kosten)
+    abrechnung        = float(_get("abrechnungskosten", 70.0))
+    grundgebuehr_jahr = 12.0 * gg_mon                         # nur als Kosten, nicht als Einnahme
+    rest_costs        = p_rest * rest_sum                     # Reststrom (neutral)
 
-    return {"einnahmen_j1": einnahmen, "kosten_j1": kosten, "gewinn_j1": einnahmen - kosten}
+    kosten = zaehler + abrechnung + grundgebuehr_jahr + rest_costs
+
+    return {
+        "einnahmen_j1": float(einnahmen),
+        "kosten_j1": float(kosten),
+        "gewinn_j1": float(einnahmen - kosten),
+    }
 
 # ---------- Cashflow & IRR (Original-Variante) ----------
 def cashflow_n(jahre: int = 20):
