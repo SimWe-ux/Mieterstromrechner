@@ -43,7 +43,7 @@ C.soc_start_kwh = 0.20 * C.speicher_kwh
 C.wp_aktiv = bool(has_wp)
 C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 
-# ----Simulation & KPIs----
+# ----Eigenverbrauchsquote & Autarkiegard----
 
 sim = M.simulate_hourly() 
 S = sim["summen"]
@@ -57,7 +57,7 @@ col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
 col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
     
 
-# ---- Jahresverlauf----
+# ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
 def monthly_sum(series):
@@ -97,17 +97,32 @@ df_long = df_plot.reset_index(drop=True).melt(
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
-container = st.container(border=True)
-container.write("k = M.wirtschaftlichkeit_kpis(jahre=20)
+k = M.wirtschaftlichkeit_kpis(jahre=20)
 
-    st.subheader("Wirtschaftlichkeit")
-    c1, c2 = st.columns(2)
-    c1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
-    c1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
-    c1.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
+st.subheader("Wirtschaftlichkeit")
+c1, c2 = st.columns(2)
+c1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+c1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
+c1.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
 
-    c2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
-    c2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")"
-                )
+c2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+c2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
+c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+
+# --- Abbildung Cashflows über 20 Jahre----
+cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
+cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
+
+# Jahresachse (Start = aktuelles Jahr)
+start_year = pd.Timestamp.today().year
+years_idx = pd.Index(range(start_year, start_year + len(cum)), name="Jahr")
+
+# Positive kumulierte Werte als "Einnahmen", negative als "Ausgaben"
+df_amort = pd.DataFrame({
+    "Einnahmen kumuliert [€]": np.where(cum > 0, cum, 0.0),
+    "Ausgaben kumuliert [€]":  np.where(cum < 0, cum, 0.0),
+}, index=years_idx)
+
+st.subheader("Amortisation über 20 Jahre")
+st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
