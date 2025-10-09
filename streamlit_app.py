@@ -100,8 +100,8 @@ st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
 k = M.wirtschaftlichkeit_kpis(jahre=20)
-
 st.subheader("Wirtschaftlichkeit")
+
 c1, c2 = st.columns(2)
 c1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
 c1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
