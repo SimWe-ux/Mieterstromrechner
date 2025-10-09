@@ -208,30 +208,30 @@ def simulate_hourly() -> Dict[str, Any]:
         reststrombedarf_gewerbe_kwh=rest_gewerbe,
     )
 
-   return {
-    "reihen": {
-        "gesamtverbrauch": gesamtverbrauch,
-        "pv_prod": pv_prod,
-        "direkt": direkt,
-        "ueberschuss": ueberschuss,
-        "defizit": defizit,
-        "charge": charge,
-        "spill_after_charge": spill_after_charge, 
-        "discharge": discharge,
-        "batt_to_load": batt_to_load,
-        "soc": soc,
-        "eigenverbrauch": eigenverbrauch,
-        "netzeinspeisung": netzeinspeisung,
-        "netzbezug": netzbezug,
-        "wohnung_series": wohnung_series,
-        "wp_series": wp_series,
-        "gewerbe_series": gewerbe_series,
-        "pv_to_wohnung": pv_to_wohnung,
-        "pv_to_wp": pv_to_wp,
-        "pv_to_gewerbe": pv_to_gewerbe,
-    },
-    "summen": out,
-}
+  return {
+        "reihen": {
+            "gesamtverbrauch": gesamtverbrauch,
+            "pv_prod": pv_prod,
+            "direkt": direkt,
+            "ueberschuss": ueberschuss,
+            "defizit": defizit,
+            "charge": charge,
+            "spill_after_charge": spill_after_charge,
+            "discharge": discharge,
+            "batt_to_load": batt_to_load,
+            "soc": soc,
+            "eigenverbrauch": eigenverbrauch,
+            "netzeinspeisung": netzeinspeisung,
+            "netzbezug": netzbezug,
+            "wohnung_series": wohnung_series,
+            "wp_series": wp_series,
+            "gewerbe_series": gewerbe_series,
+            "pv_to_wohnung": pv_to_wohnung,
+            "pv_to_wp": pv_to_wp,
+            "pv_to_gewerbe": pv_to_gewerbe,
+        },
+        "summen": out,
+    }
 
 
 # ---------- CAPEX ----------
