@@ -98,8 +98,7 @@ st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
 container = st.container(border=True)
-container.write(
-    k = M.wirtschaftlichkeit_kpis(jahre=20)
+container.write( k = M.wirtschaftlichkeit_kpis(jahre=20)
 
     st.subheader("Wirtschaftlichkeit")
     c1, c2 = st.columns(2)
