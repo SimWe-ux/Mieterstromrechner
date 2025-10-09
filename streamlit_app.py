@@ -90,11 +90,10 @@ df_long = df_plot.reset_index(drop=True).melt(
     var_name="Serie",
     value_name="kWh"
 )
-
-    col1, col2 = st.columns(2)
-    col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
-    col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
-    col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
+col1, col2 = st.columns(2)
+col1.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
+col2.metric("Netzeinspeisung:", f"{S.netzeinspeisung_kwh:,.0f} kWh")
+col2.metric("Netzbezug:", f"{S.netzbezug_kwh:,.0f} kWh")
 
 # ---- Wirtschaftlichkeitsrechnung----
 st.subheader("Monatswerte – Jahresverlauf")
