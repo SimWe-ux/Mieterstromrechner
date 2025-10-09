@@ -208,7 +208,14 @@ def capex_speicher() -> float:
 def wirtschaftlichkeit_j1() -> Dict[str, float]:
     sim = simulate_hourly()
     S: Ergebnisse = sim["summen"]
-
+    
+    # Preise/Parameter aus configurations.py
+    p_pv   = float(_get("pv_stromkosten", 0.27))          # Verkaufspreis PV-Mieterstrom
+    p_rest = float(_get("reststromkosten", 0.32))          # Einkauf = Verkauf (neutral)
+    gg_mon = float(_get("grundgebuehren", 10.0))           # €/Monat (ein Anschluss)
+    ms_z   = float(_get("mieterstromzuschlage", 0.0238))   # €/kWh
+    eins   = _einspeise_satz()
+    
     # PV-Eigenverbrauch je Sektor
     ev_we = float(S.eigenverbrauch_wohnung_kwh)
     ev_ge = float(S.eigenverbrauch_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
