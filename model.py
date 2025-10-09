@@ -323,4 +323,66 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
     invest = float(capex_pv() + capex_speicher())
-    j1 = wirtschaftlichkei
+    j1 = wirtschaftlichkeit_j1()
+    ein = float(j1.get("einnahmen_j1", 0.0))
+    kos = float(j1.get("kosten_j1", 0.0))
+    escal = float(_get("strompreissteigerung_pa", 0.03))
+
+    cf = [-invest]
+    for y in range(jahre):
+        factor = (1.0 + escal) ** y
+        cf.append(ein * factor - kos * factor)
+    return cf
+
+
+def irr(cashflows) -> float:
+    c = list(map(float, cashflows))
+
+    def npv(rate: float) -> float:
+        return sum(v / ((1.0 + rate) ** i) for i, v in enumerate(c))
+
+    r = 0.08
+    for _ in range(100):
+        f = npv(r)
+        df = sum(-i * v / ((1.0 + r) ** (i + 1)) for i, v in enumerate(c[1:], start=1))
+        if abs(df) < 1e-12:
+            break
+        step = f / df
+        r -= step
+        if abs(step) < 1e-8:
+            break
+    return float(r)
+
+
+def payback_years(cashflows) -> float | None:
+    """Erstes Jahr (ggf. mit Nachkommastellen), in dem der kumulierte CF >= 0 wird."""
+    cf = list(map(float, cashflows))
+    cum = cf[0]
+    for y in range(1, len(cf)):
+        prev = cum
+        cum += cf[y]
+        if cum >= 0:
+            return (y - 1) + (0.0 - prev) / cf[y] if cf[y] != 0 else float(y)
+    return None
+
+
+def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
+    capex = float(capex_pv() + capex_speicher())
+    j1 = wirtschaftlichkeit_j1()
+    cf = cashflow_n(jahre=jahre)
+
+    try:
+        irr_pct = irr(cf) * 100.0
+    except Exception:
+        irr_pct = float("nan")
+
+    pb = payback_years(cf)
+
+    return {
+        "capex": capex,
+        "irr_pct": irr_pct,
+        "payback_years": pb,
+        "einnahmen_j1": float(j1.get("einnahmen_j1", 0.0)),
+        "kosten_j1": float(j1.get("kosten_j1", 0.0)),
+        "gewinn_j1": float(j1.get("gewinn_j1", 0.0)),
+    }
