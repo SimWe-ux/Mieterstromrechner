@@ -230,7 +230,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     # --- Einnahmen ---
     verkauf_pv  = p_pv * (ev_we + ev_ge + ev_wp)             # PV-Verkauf an alle Kunden
     ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)             # Zuschlag auf PV-Mieterstrom
-    einspeise   = eins  * float(S.netzeinspeisung_kwh)
+    einspeise = _tiered_avg_einspeise_satz(float(C.pv_kwp)) * float(S.netzeinspeisung_kwh) # Ø-Vergütung
     rest_rev    = p_rest * rest_sum                          # Reststrom (neutral)
 
     einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev
