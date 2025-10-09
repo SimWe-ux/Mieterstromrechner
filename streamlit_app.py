@@ -1,6 +1,8 @@
 import streamlit as st
 import configurations as C
-import model as M
+import importlib
+import model
+M = importlib.reload(model)
 import profiles as P
 import numpy as np
 import pandas as pd
