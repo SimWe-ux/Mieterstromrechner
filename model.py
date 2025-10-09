@@ -235,9 +235,72 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     sim = simulate_hourly()
     S: Ergebnisse = sim["summen"]
 
+    # Einnahmen
+    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
+
+    # PV-Stromverkauf (an Wohnungen + optional Gewerbe)
+    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if C.gewerbe_aktiv else 0.0)
+    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
+
+    # Mieterstromzuschlag auf gesamten EV
+    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
+
+    # Einspeisevergütung (stufenabhängig)
+    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
+
+    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise)
+
+    # Kosten
+    zaehler = (
+        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
+        + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
+    )
+    abrechnung = float(_get("abrechnungskosten", 70.0))
+    reststrom_kosten = (
+        12.0 * float(_get("grundgebuehren", 10.0))
+        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
+    )
+    kosten = float(zaehler + abrechnung + reststrom_kosten)
+
+    return {"einnahmen_j1": einnahmen, "kosten_j1": kosten, "gewinn_j1": einnahmen - kosten}
+
+# ---------- Cashflow & IRR ----------
+def cashflow_n(jahre: int = 20):
+    """Jahr 0 negativ (Invest), dann jährliche Netto-CFs mit Eskalation."""
+    invest = float(capex_pv() + capex_speicher())
+    j1 = wirtschaftlichkeit_j1()
+    # robust lesen:
+    ein = float(j1.get("einnahmen_j1", 0.0))
+    kos = float(j1.get("kosten_j1", 0.0))
+    escal = float(_get("strompreissteigerung_pa", 0.03))
+
+    cf = [-invest]
+    for y in range(jahre):
+        factor = (1.0 + escal) ** y
+        cf.append(ein * factor - kos * factor)
+    return cf
+
+def irr(cashflows) -> float:
+    """IRR via Newton-Verfahren. Gibt float (z. B. 0.081 = 8,1%) zurück."""
+    c = list(map(float, cashflows))
+
+    def npv(rate: float) -> float:
+        return sum(v / ((1.0 + rate) ** i) for i, v in enumerate(c))
+
+    r = 0.08
+    for _ in range(100):
+        f = npv(r)
+        df = sum(-i * v / ((1.0 + r) ** (i + 1)) for i, v in enumerate(c[1:], start=1))
+        if abs(df) < 1e-12:
+            break
+        step = f / df
+        r -= step
+        if abs(step) < 1e-8:
+            break
+    return float(r)
+
 def payback_years(cashflows) -> float | None:
-    """Erstes Jahr (ggf. mit Nachkommastellen), in dem der kumulierte Cashflow >= 0 wird.
-    Gibt None zurück, wenn innerhalb des Horizonts kein Break-even erreicht wird."""
+    """Erstes Jahr (ggf. mit Nachkommastellen), in dem der kumulierte CF >= 0 wird."""
     cf = list(map(float, cashflows))
     cum = cf[0]
     for y in range(1, len(cf)):
@@ -247,99 +310,25 @@ def payback_years(cashflows) -> float | None:
             return (y - 1) + (0.0 - prev) / cf[y] if cf[y] != 0 else float(y)
     return None
 
-def wirtschaftlichkeit_kpis(jahre: int = 20) -> dict:
-    capex = capex_pv() + capex_speicher()
+def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
+    capex = float(capex_pv() + capex_speicher())
     j1 = wirtschaftlichkeit_j1()
     cf = cashflow_n(jahre=jahre)
+
     try:
         irr_pct = irr(cf) * 100.0
     except Exception:
         irr_pct = float("nan")
+
     pb = payback_years(cf)
+
     return {
         "capex": capex,
         "irr_pct": irr_pct,
         "payback_years": pb,
-        "einnahmen_j1": j1["einnahmen_j1"],
-        "kosten_j1": j1["kosten_j1"],
-        "gewinn_j1": j1["gewinn_j1"],
+        "einnahmen_j1": float(j1.get("einnahmen_j1", 0.0)),
+        "kosten_j1": float(j1.get("kosten_j1", 0.0)),
+        "gewinn_j1": float(j1.get("gewinn_j1", 0.0)),
     }
 
-    # Einnahmen
-    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
-
-    # PV-Stromverkauf: deine Variable 'pv_stromkosten' (€/kWh)
-    # Standard: Verkauf an Wohnungen + (optional) Gewerbe
-    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if C.gewerbe_aktiv else 0.0)
-    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
-
-    # Mieterstromzuschlag auf gesamten EV (konservativ)
-    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
-
-    # Einspeisevergütung (stufenabhängig)
-    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
-
-    einnahmen = grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise
-
-    # Kosten
-    # Zähler: je WE + 1× PV
-    zaehler = (
-        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
-        + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
-    )
-
-    abrechnung = float(_get("abrechnungskosten", 70.0))
-
-    # Reststrom nur für Wohnungen (üblich) – bei Bedarf WP/GE ergänzen
-    reststrom_kosten = (
-        12.0 * float(_get("grundgebuehren", 10.0))
-        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
-    )
-
-    kosten = zaehler + abrechnung + reststrom_kosten
-
-    return {
-        "einnahmen_j1": float(einnahmen),
-        "kosten_j1": float(kosten),
-        "gewinn_j1": float(einnahmen - kosten),
-    }
-
-# ---------- Cashflow & IRR ----------
-def cashflow_n(jahre: int = 20):
-    cf = [-(capex_pv() + capex_speicher())]
-    j1 = wirtschaftlichkeit_j1()
-    ein, kos = j1["einnahmen_j1"], j1["kosten_j1"]
-    escal = float(_get("strompreissteigerung_pa", 0.03))
-    for y in range(jahre):
-        factor = (1.0 + escal) ** y
-        cf.append(ein * factor - kos * factor)
-    return cf
-
-def irr(cashflows) -> float:
-    """Einfache IRR-Berechnung (Newton-Verfahren)."""
-    cashflows = list(map(float, cashflows))
-
-    def npv(rate: float) -> float:
-        return sum(cf / ((1.0 + rate) ** i) for i, cf in enumerate(cashflows))
-
-    r = 0.08
-    for _ in range(100):
-        f = npv(r)
-        df = sum(-i * cf / ((1.0 + r) ** (i + 1)) for i, cf in enumerate(cashflows[1:], start=1))
-        if abs(df) < 1e-12:
-            break
-        step = f / df
-        r -= step
-        if abs(step) < 1e-8:
-            break
-    return float(r)
-
-__all__ = [
-    "simulate_hourly",
-    "capex_pv",
-    "capex_speicher",
-    "wirtschaftlichkeit_j1",
-    "cashflow_n",
-    "irr",
-]
 
