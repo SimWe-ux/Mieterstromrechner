@@ -250,40 +250,34 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     rest_ge = float(S.reststrombedarf_gewerbe_kwh) if getattr(C, "gewerbe_aktiv", False) else 0.0
     rest_wp = float(S.reststrombedarf_wp_kwh)      if getattr(C, "wp_aktiv", False)       else 0.0
 
-    # ---------------- Einnahmen ----------------
-    # PV-Verkauf an Wohnungen + Gewerbe + WP
-    verkauf_ev = p_pv * (ev_we + ev_ge + ev_wp)
+    # Einnahmen
+    grundgebuehr_eur_jahr = 12.0 * float(_get("grundgebuehren", 10.0)) * int(C.wohneinheiten)
 
-    # Mieterstromzuschlag auf ALLES, was als Mieterstrom verkauft wird (inkl. WP)
-    ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)
+    # PV-Stromverkauf (an Wohnungen + optional Gewerbe)
+    verkaufsbasis_kwh = S.eigenverbrauch_wohnung_kwh + (S.eigenverbrauch_gewerbe_kwh if C.gewerbe_aktiv else 0.0)
+    solarstrom_ap = float(_get("pv_stromkosten", 0.27)) * float(verkaufsbasis_kwh)
 
-    # Einspeisevergütung
-    einspeise = eins * float(S.netzeinspeisung_kwh)
+    # Mieterstromzuschlag auf gesamten EV
+    ms_zuschlag = float(_get("mieterstromzuschlage", 0.0238)) * float(S.eigenverbrauch_kwh)
 
-    einnahmen = float(verkauf_ev + ms_einnahme + einspeise)
+    # Einspeisevergütung (stufenabhängig)
+    einspeise = _einspeise_satz() * float(S.netzeinspeisung_kwh)
 
-    # ---------------- Kosten ----------------
-    # Zähler (WE-weise) + 1× PV-Zähler
+    einnahmen = float(grundgebuehr_eur_jahr + solarstrom_ap + ms_zuschlag + einspeise)
+
+    # Kosten
     zaehler = (
-        float(_get("zaehlergebuehren_we", 30.0)) * int(getattr(C, "wohneinheiten", 1))
+        float(_get("zaehlergebuehren_we", 30.0)) * int(C.wohneinheiten)
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
-
-    # Abrechnung + Grundgebühr (ein Anschluss, vereinfacht)
     abrechnung = float(_get("abrechnungskosten", 70.0))
-    grundgebuehr_eur_jahr = 12.0 * gg_mon
+    reststrom_kosten = (
+        12.0 * float(_get("grundgebuehren", 10.0))
+        + float(_get("reststromkosten", 0.35)) * float(S.reststrombedarf_wohnung_kwh)
+    )
+    kosten = float(zaehler + abrechnung + reststrom_kosten)
 
-    # Reststromkosten für WE + GE + WP
-    reststrom_kosten = p_grid * (rest_we + rest_ge + rest_wp)
-
-    kosten = float(zaehler + abrechnung + grundgebuehr_eur_jahr + reststrom_kosten)
-
-    return {
-        "einnahmen_j1": einnahmen,
-        "kosten_j1": kosten,
-        "gewinn_j1": einnahmen - kosten,
-    }
-
+    return {"einnahmen_j1": einnahmen, "kosten_j1": kosten, "gewinn_j1": einnahmen - kosten}
 
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
@@ -351,5 +345,3 @@ def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
         "kosten_j1": float(j1.get("kosten_j1", 0.0)),
         "gewinn_j1": float(j1.get("gewinn_j1", 0.0)),
     }
-
-
