@@ -222,7 +222,7 @@ def simulate_hourly() -> Dict[str, Any]:
             "batt_to_load": batt_to_load,
             "soc": soc,
             "eigenverbrauch": eigenverbrauch,
-            "spill_after_charge": spill_after_charge,
+           "spill_after_charge": netzeinspeisung,
             "netzbezug": netzbezug,
             "wohnung_series": wohnung_series,
             "wp_series": wp_series,
