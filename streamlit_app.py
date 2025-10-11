@@ -53,8 +53,8 @@ sim = M.simulate_hourly()
 S = sim["summen"]
 
 col1, col2 = st.columns(2)
-st.badge("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-st.badge("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %") 
+st.columns("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
+st.columns("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %") 
 
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
