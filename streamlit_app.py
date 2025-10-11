@@ -52,9 +52,11 @@ C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 sim = M.simulate_hourly() 
 S = sim["summen"]
 
-col1, col2 = st.columns(2)
-col1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
+st.header("Unabhängigkeit")
+
+c1, c2 = st.columns(2)
+c1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
+c2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
