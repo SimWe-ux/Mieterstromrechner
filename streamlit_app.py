@@ -97,6 +97,10 @@ st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 # ---- Lead Formular ----
+with st.sidebar:
+    we = st.slider("Anzahl Wohneinheiten", 1, 25, 2, 1, key="we")
+    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", 1500, 100000, 2500, 100, key="we_verbrauch")
+
 TO = "simon.wedeking@gmx.de"
 
 def send_via_mailto(subject: str, body: str):
