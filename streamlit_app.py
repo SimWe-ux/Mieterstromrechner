@@ -96,10 +96,8 @@ df_amort = pd.DataFrame({
 st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
-st.markdown("***")
-
-
-TO = "info@deine-domain.de"  # Zieladresse
+# ---- Lead Formular ----
+TO = "simon.wedeking@gmx.de"  # Zieladresse
 
 def send_via_mailto(subject: str, body: str):
     url = f"mailto:{TO}?subject={quote(subject)}&body={quote(body)}"
@@ -109,16 +107,24 @@ def send_via_mailto(subject: str, body: str):
 def lead_dialog():
     with st.form("lead_form", clear_on_submit=True):
         # --- Pflichtfelder
-        name  = st.text_input("Ihr Name *")
-        email = st.text_input("Ihre E-Mail *")
-        strasse = st.text_input("Straße & Hausnummer *")
-        plz     = st.text_input("PLZ *", max_chars=5)
+        name    = st.text_input("Ihr Name *")
+        email   = st.text_input("Ihre E-Mail *")
+        strasse = st.text_input("Objekt Straße & Hausnummer *")
+        plz     = st.text_input("Objekt PLZ *", max_chars=5)
         ort     = st.text_input("Ort *")
-        # --- optional
-        tel   = st.text_input("Telefon")
-        we    = st.number_input("Wohneinheiten", 1, 500, 2, 1)
-        verb  = st.number_input("Jahresverbrauch gesamt (kWh)", 0, value=2500, step=100)
-        msg   = st.text_area("Nachricht (optional)")
+        tel     = st.text_input("Telefon")
+
+        # --- Defaults aus der UI (Session State) lesen
+        we_default   = int(st.session_state.get("we", 2))
+        verb_default = int(st.session_state.get("we_verbrauch", 2500))
+
+        # --- Optional: andere Keys im Dialog, damit es keine Konflikte gibt
+        we_form = st.number_input("Wohneinheiten", min_value=1, max_value=500,
+                                  value=we_default, step=1, key="lead_we")
+        verb_form = st.number_input("Jahresverbrauch gesamt (kWh)", min_value=0,
+                                    value=verb_default, step=100, key="lead_verb")
+
+        msg     = st.text_area("Nachricht (optional)")
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
 
         can_submit = all([name, email, strasse, plz, ort, consent])
@@ -134,8 +140,8 @@ def lead_dialog():
 
 Objekt
 - Adresse: {strasse}, {plz} {ort}
-- Wohneinheiten: {we}
-- Jahresverbrauch: {verb} kWh
+- Wohneinheiten: {we_form}
+- Jahresverbrauch: {verb_form} kWh
 
 Nachricht
 {msg}
@@ -143,11 +149,20 @@ Nachricht
 Meta
 - Timestamp: {datetime.now().isoformat()}
 """
-            # Logging (optional, z.B. CSV – später kannst du Sheets/DB nehmen)
+
+            # (Optional) Werte aus dem Dialog zurück in die App übernehmen:
+            st.session_state.we = int(we_form)
+            st.session_state.we_verbrauch = int(verb_form)
+            # ...und direkt ins Modell mappen:
+            C.wohneinheiten = int(we_form)
+            C.wohnungen_verbrauch_kwh = float(verb_form)
+
+            # (Optional) einfaches Logging
             st.session_state.setdefault("leads", []).append({
-                "ts": datetime.now().isoformat(), "name": name, "email": email,
-                "tel": tel, "strasse": strasse, "plz": plz, "ort": ort,
-                "we": we, "verbrauch": verb, "msg": msg
+                "ts": datetime.now().isoformat(),
+                "name": name, "email": email, "tel": tel,
+                "strasse": strasse, "plz": plz, "ort": ort,
+                "we": int(we_form), "verbrauch": int(verb_form), "msg": msg
             })
 
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
@@ -155,8 +170,8 @@ Meta
             st.stop()
 
 # CTA auf der Seite
-st.button("Mieterstrom-Projekt anmelden", type="primary", on_click=lead_dialog)
-
+st.button("Mieterstromangebot anfragen", type="primary", on_click=lead_dialog)
+st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
