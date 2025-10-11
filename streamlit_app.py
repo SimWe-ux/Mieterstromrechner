@@ -132,7 +132,10 @@ def lead_dialog():
                 "PV-Anlage (kWp)", min_value=0.0, step=1.0,
                 value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
             )
-    
+             st.number_input(
+                "Speicher (kWh)", min_value=0.0, step=1.0,
+                value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
+            )
             ge_active = bool(st.session_state.get("lead_has_ge", False))
             if ge_active:
                 ge_form = st.number_input(
@@ -165,6 +168,7 @@ def lead_dialog():
             we_val   = int(st.session_state.get("lead_we", 0))
             verb_val = int(st.session_state.get("lead_verb", 0))
             pv_val   = float(st.session_state.get("lead_pv", 0.0))
+            sp_val   = int(st.session_state.get("lead_sp", 0))
 
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
@@ -187,17 +191,6 @@ Meta
 - Timestamp: {datetime.now().isoformat()}
 """
 
-            # Optional: Logging
-            st.session_state.setdefault("leads", []).append({
-                "ts": datetime.now().isoformat(),
-                "name": name, "email": email, "tel": tel,
-                "strasse": strasse, "plz": plz, "ort": ort,
-                "we": we_val, "verbrauch_we": verb_val, "pv_kwp": pv_val,
-                "ge_aktiv": ge_active, "verbrauch_ge": int(ge_form) if ge_active else 0,
-                "wp_aktiv": wp_active, "verbrauch_wp": int(wp_form) if wp_active else 0,
-                "msg": msg,
-            })
-
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
             st.stop()
@@ -207,6 +200,7 @@ def open_lead_dialog():
     st.session_state["lead_we"]    = int(we)
     st.session_state["lead_verb"]  = int(we_verbrauch)
     st.session_state["lead_pv"]    = float(pv)
+    st.session_state["lead_sp"]    = float(speicher)
 
     st.session_state["lead_has_ge"] = bool(has_ge)
     st.session_state["lead_ge"]     = int(ge_verbrauch) if has_ge else 0
