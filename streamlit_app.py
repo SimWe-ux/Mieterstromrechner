@@ -97,7 +97,7 @@ st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 # ---- Lead Formular ----
-TO = "simon.wedeking@gmx.de"  # Zieladresse
+TO = "simon.wedeking@gmx.de"
 
 def send_via_mailto(subject: str, body: str):
     url = f"mailto:{TO}?subject={quote(subject)}&body={quote(body)}"
@@ -106,7 +106,7 @@ def send_via_mailto(subject: str, body: str):
 @st.dialog("Mieterstrom – Projektanmeldung")
 def lead_dialog():
     with st.form("lead_form", clear_on_submit=True):
-        # --- Pflichtfelder
+        # Pflichtfelder
         name    = st.text_input("Ihr Name *")
         email   = st.text_input("Ihre E-Mail *")
         strasse = st.text_input("Objekt Straße & Hausnummer *")
@@ -114,15 +114,12 @@ def lead_dialog():
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
 
-        # --- Defaults aus der UI (Session State) lesen
+        # Defaults NUR aus der Sidebar lesen (nicht zurückschreiben)
         we_default   = int(st.session_state.get("we", 2))
         verb_default = int(st.session_state.get("we_verbrauch", 2500))
 
-        # --- Optional: andere Keys im Dialog, damit es keine Konflikte gibt
-        we_form = st.number_input("Wohneinheiten", min_value=1, max_value=500,
-                                  value=we_default, step=1, key="lead_we")
-        verb_form = st.number_input("Jahresverbrauch gesamt (kWh)", min_value=0,
-                                    value=verb_default, step=100, key="lead_verb")
+        we_form   = st.number_input("Wohneinheiten", 1, 500, we_default, 1, key="lead_we")
+        verb_form = st.number_input("Jahresverbrauch gesamt (kWh)", 0, value=verb_default, step=100, key="lead_verb")
 
         msg     = st.text_area("Nachricht (optional)")
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
@@ -149,15 +146,7 @@ Nachricht
 Meta
 - Timestamp: {datetime.now().isoformat()}
 """
-
-            # (Optional) Werte aus dem Dialog zurück in die App übernehmen:
-            st.session_state.we = int(we_form)
-            st.session_state.we_verbrauch = int(verb_form)
-            # ...und direkt ins Modell mappen:
-            C.wohneinheiten = int(we_form)
-            C.wohnungen_verbrauch_kwh = float(verb_form)
-
-            # (Optional) einfaches Logging
+            # Optionales Lead-Logging (nur in Session; kein Zurückschreiben an UI/Configs)
             st.session_state.setdefault("leads", []).append({
                 "ts": datetime.now().isoformat(),
                 "name": name, "email": email, "tel": tel,
@@ -169,8 +158,9 @@ Meta
             send_via_mailto(subject, body)
             st.stop()
 
-# CTA auf der Seite
+# CTA-Button irgendwo auf der Seite:
 st.button("Mieterstromangebot anfragen", type="primary", on_click=lead_dialog)
+
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
