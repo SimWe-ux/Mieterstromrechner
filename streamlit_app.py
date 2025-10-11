@@ -79,6 +79,13 @@ col2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 col2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 col2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
+st.button(
+    "Mieterstromangebot anfragen",
+    type="primary",
+    use_container_width=True,
+    on_click=open_lead_dialog
+)
+
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
 cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
@@ -185,6 +192,22 @@ Meta
             send_via_mailto(subject, body)
             st.stop()
 
+def open_lead_dialog():
+    # Werte aus der Sidebar in den Session-State spiegeln
+    st.session_state["lead_we"]    = int(we)
+    st.session_state["lead_verb"]  = int(we_verbrauch)
+
+    st.session_state["lead_has_ge"] = bool(has_ge)
+    st.session_state["lead_ge"]     = int(ge_verbrauch) if has_ge else 0
+
+    st.session_state["lead_has_wp"] = bool(has_wp)
+    st.session_state["lead_wp"]     = int(wp_verbrauch) if has_wp else 0
+
+    st.session_state["lead_pv"]     = float(pv)
+
+    # Dialog öffnen
+    lead_dialog()
+    
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
