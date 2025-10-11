@@ -68,7 +68,7 @@ metric_card(row1[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f}
 
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
-st.subheader("Wirtschaftlichkeit")
+st.header("Wirtschaftlichkeit")
 
 col1, col2 = st.columns(2)
 col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
