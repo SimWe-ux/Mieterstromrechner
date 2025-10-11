@@ -79,6 +79,33 @@ col2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 col2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 col2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
+k = M.wirtschaftlichkeit_kpis(jahre=20)
+st.subheader("Wirtschaftlichkeit")
+
+col1, col2, col3 = st.columns([1, 1, 0.9])  # dritte Spalte etwas schmaler (optional)
+
+with col1:
+    st.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+    st.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
+    st.metric(
+        "Laufzeit (Amortisation)",
+        "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre"
+    )
+
+with col2:
+    st.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+    st.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
+    st.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+
+with col3:
+    st.markdown("**Angebot anfragen**")
+    st.button(
+        "Mieterstromangebot anfragen",
+        type="primary",
+        use_container_width=True,
+        on_click=open_lead_dialog  # <- deine Funktion von oben
+    )
+
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
 cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
