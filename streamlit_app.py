@@ -71,11 +71,13 @@ k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.subheader("Wirtschaftlichkeit")
 
 col1, col2 = st.columns(2)
-col1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
 col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
-col1.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
+col2.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
 
-col2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+with st.expander("Weitere Ergebnisse"):
+    cols = st.columns(2)
+col1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+col1.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 col2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 col2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
