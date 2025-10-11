@@ -56,6 +56,9 @@ col1, col2 = st.columns(2)
 col1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %") 
 
+if hasattr(st, "badge"):
+    st.badge(f"Autarkie {autarkie_txt} • EV-Quote {evq_txt}")
+
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
