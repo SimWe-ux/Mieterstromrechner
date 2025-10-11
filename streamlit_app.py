@@ -106,6 +106,18 @@ with st.container(border=True):
         st.metric("Netzeinspeisung", f"{S.netzeinspeisung_kwh:,.0f} kWh")
         st.metric("Netzbezug", f"{S.netzbezug_kwh:,.0f} kWh")
 
+def metric_card(col, label, value, delta=None):
+    with col.container(border=True):
+        st.metric(label, value, delta)
+
+row1 = st.columns(2, gap="medium")
+row2 = st.columns(2, gap="medium")
+
+metric_card(row1[0], "PV-Erzeugung",        f"{S.pv_erzeugung_kwh:,.0f} kWh")
+metric_card(row1[1], "Eigenverbrauch (Jahr)", f"{S.eigenverbrauch_kwh:,.0f} kWh")
+metric_card(row2[0], "Netzeinspeisung",     f"{S.netzeinspeisung_kwh:,.0f} kWh")
+metric_card(row2[1], "Netzbezug",           f"{S.netzbezug_kwh:,.0f} kWh")
+
 
 with st.expander("Weitere Ergebnisse"):
     cols = st.columns(3)
