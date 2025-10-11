@@ -94,7 +94,7 @@ df_long = df_plot.reset_index(drop=True).melt(
 )
 
 st.subheader("Monatswerte – Jahresverlauf")
-st.area_chart(df_m)
+st.line_chart(df_m)
 st.subheader("Jahreswerte im Überblick")
 
 def metric_card(col, label, value, delta=None):
