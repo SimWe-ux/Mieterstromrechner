@@ -134,7 +134,7 @@ def lead_dialog():
         if ge_active:
             ge_form = st.number_input(
                 "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
-                value=int(st.session_state.get("lead_ge", 0))
+                value=int(st.session_state.get("lead_ge", 0)), disabled=True
             )
         else:
             ge_form = 0
@@ -144,7 +144,7 @@ def lead_dialog():
         if wp_active:
             wp_form = st.number_input(
                 "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
-                value=int(st.session_state.get("lead_wp", 0))
+                value=int(st.session_state.get("lead_wp", 0)), disabled=True
             )
         else:
             wp_form = 0
