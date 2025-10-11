@@ -153,12 +153,12 @@ def lead_dialog():
                 wp_form = 0
                 st.caption("Wärmepumpe: nicht aktiviert")
     
-            msg     = st.text_area("Nachricht (optional)")
-            consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
+        msg     = st.text_area("Nachricht (optional)")
+        consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
     
-            can_submit = all([name, email, strasse, plz, ort, consent])
-            submitted = st.form_submit_button(
-                "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
+        can_submit = all([name, email, strasse, plz, ort, consent])
+        submitted = st.form_submit_button(
+             "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
             )
 
         if submitted:
