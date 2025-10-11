@@ -114,7 +114,8 @@ def lead_dialog():
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
 
-        st.caption("Objektdaten (aus der linken Seitenleiste, nicht veränderbar)")
+       with st.expander("Mieterstrom Daten", expanded=False):
+        st.caption("Diese Werte kommen aus der linken Seitenleiste und sind hier schreibgeschützt.")
         # --- Read-only Spiegel aus Sidebar:
         st.number_input(
             "Wohneinheiten", min_value=0, max_value=500, step=1,
