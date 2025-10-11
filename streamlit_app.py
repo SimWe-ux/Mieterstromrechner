@@ -66,7 +66,7 @@ row2 = st.columns(2, gap="medium")
 metric_card(row1[0], "Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 metric_card(row1[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 
-st.markdown: "****"
+st.markdown:("****")
 
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
