@@ -188,7 +188,7 @@ def lead_dialog():
             ge_val    = int(st.session_state.get("lead_ge", 0))
             wp_val    = int(st.session_state.get("lead_wp", 0))
 
-         subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
+            subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
 - Name: {name}
 - E-Mail: {email}
@@ -208,7 +208,7 @@ Nachricht
 
 Meta
 - Timestamp: {datetime.now().isoformat()}
-""
+"""
 
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
