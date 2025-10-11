@@ -17,7 +17,7 @@ with st.sidebar:
     st.header("Immobilien Informationen")
     
     # Wohneinheiten & Jahresverbrauch 
-    we = st.slider("Anzahl Wohneinheiten", min_value=1, max_value=25, value=2, step=1)
+    we = st.slider("Anzahl Wohneinheiten", min_value=0, max_value=25, value=2, step=1)
     we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=1000, max_value=100000, value=2500, step=100)
 
     # Wenn Gewerbeeinheiten vorhanden 
