@@ -75,11 +75,12 @@ col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
 col2.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
 
 with st.expander("Weitere Ergebnisse"):
-    cols = st.columns(2)
-    cols[1].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+    cols = st.columns(4)
+    
+    cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
     cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
     cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    cols[2].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+    cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
