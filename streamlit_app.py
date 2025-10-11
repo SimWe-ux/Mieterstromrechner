@@ -6,6 +6,8 @@ M = importlib.reload(model)
 import profiles as P
 import numpy as np
 import pandas as pd
+from urllib.parse import quote
+from datetime import datetime
 
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
@@ -64,10 +66,6 @@ row2 = st.columns(2, gap="medium")
 metric_card(row1[0], "Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 metric_card(row1[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 
-c1, c2 = st.columns(2)
-c1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-c2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
-
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.subheader("Wirtschaftlichkeit")
@@ -99,6 +97,66 @@ st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 st.markdown("***")
+
+
+TO = "info@deine-domain.de"  # Zieladresse
+
+def send_via_mailto(subject: str, body: str):
+    url = f"mailto:{TO}?subject={quote(subject)}&body={quote(body)}"
+    st.link_button("E-Mail in Mailprogramm öffnen", url, use_container_width=True)
+
+@st.dialog("Mieterstrom – Projektanmeldung")
+def lead_dialog():
+    with st.form("lead_form", clear_on_submit=True):
+        # --- Pflichtfelder
+        name  = st.text_input("Ihr Name *")
+        email = st.text_input("Ihre E-Mail *")
+        strasse = st.text_input("Straße & Hausnummer *")
+        plz     = st.text_input("PLZ *", max_chars=5)
+        ort     = st.text_input("Ort *")
+        # --- optional
+        tel   = st.text_input("Telefon")
+        we    = st.number_input("Wohneinheiten", 1, 500, 2, 1)
+        verb  = st.number_input("Jahresverbrauch gesamt (kWh)", 0, value=2500, step=100)
+        msg   = st.text_area("Nachricht (optional)")
+        consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
+
+        can_submit = all([name, email, strasse, plz, ort, consent])
+        submitted = st.form_submit_button("Anfrage senden", type="primary",
+                                          use_container_width=True, disabled=not can_submit)
+
+        if submitted:
+            subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
+            body = f"""Kontakt
+- Name: {name}
+- E-Mail: {email}
+- Telefon: {tel}
+
+Objekt
+- Adresse: {strasse}, {plz} {ort}
+- Wohneinheiten: {we}
+- Jahresverbrauch: {verb} kWh
+
+Nachricht
+{msg}
+
+Meta
+- Timestamp: {datetime.now().isoformat()}
+"""
+            # Logging (optional, z.B. CSV – später kannst du Sheets/DB nehmen)
+            st.session_state.setdefault("leads", []).append({
+                "ts": datetime.now().isoformat(), "name": name, "email": email,
+                "tel": tel, "strasse": strasse, "plz": plz, "ort": ort,
+                "we": we, "verbrauch": verb, "msg": msg
+            })
+
+            st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
+            send_via_mailto(subject, body)
+            st.stop()
+
+# CTA auf der Seite
+st.button("Mieterstrom-Projekt anmelden", type="primary", on_click=lead_dialog)
+
 
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
@@ -170,36 +228,3 @@ with st.expander("Weitere Ergebnisse"):
 
         
 st.markdown("***")
-
-# ---- Wirtschaftlichkeitsrechnung----
-k = M.wirtschaftlichkeit_kpis(jahre=20)
-st.subheader("Wirtschaftlichkeit")
-
-c1, c2 = st.columns(2)
-c1.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
-c1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
-c1.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
-
-c2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
-c2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-c2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
-
-# --- Abbildung Cashflows über 20 Jahre----
-cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
-cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
-
-# Jahresachse (Start = aktuelles Jahr)
-start_year = pd.Timestamp.today().year
-years_idx = pd.Index(range(start_year, start_year + len(cum)), name="Jahr")
-
-# Positive kumulierte Werte als "Einnahmen", negative als "Ausgaben"
-df_amort = pd.DataFrame({
-    "Einnahmen kumuliert [€]": np.where(cum > 0, cum, 0.0),
-    "Ausgaben kumuliert [€]":  np.where(cum < 0, cum, 0.0),
-}, index=years_idx)
-
-st.subheader("Amortisation über 20 Jahre")
-st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
-
-st.markdown("***")
-
