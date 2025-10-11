@@ -79,33 +79,6 @@ col2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 col2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 col2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
-k = M.wirtschaftlichkeit_kpis(jahre=20)
-st.subheader("Wirtschaftlichkeit")
-
-col1, col2, col3 = st.columns([1, 1, 0.9])  # dritte Spalte etwas schmaler (optional)
-
-with col1:
-    st.metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
-    st.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
-    st.metric(
-        "Laufzeit (Amortisation)",
-        "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre"
-    )
-
-with col2:
-    st.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
-    st.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    st.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
-
-with col3:
-    st.markdown("**Angebot anfragen**")
-    st.button(
-        "Mieterstromangebot anfragen",
-        type="primary",
-        use_container_width=True,
-        on_click=open_lead_dialog  # <- deine Funktion von oben
-    )
-
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
 cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
@@ -124,17 +97,16 @@ st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 # --- Dialog / Formular ---
-# --- Mail-Helfer ---
 TO = "simon.wedeking@gmx.de"
+
 def send_via_mailto(subject: str, body: str):
     url = f"mailto:{TO}?subject={quote(subject)}&body={quote(body)}"
     st.link_button("E-Mail in Mailprogramm öffnen", url, use_container_width=True)
 
-# --- Dialog (Formular) ---
 @st.dialog("Mieterstrom – Projektanmeldung")
 def lead_dialog():
     with st.form("lead_form", clear_on_submit=True):
-        # Pflichtfelder
+        # --- Pflichtfelder
         name    = st.text_input("Ihr Name *")
         email   = st.text_input("Ihre E-Mail *")
         strasse = st.text_input("Objekt Straße & Hausnummer *")
@@ -142,9 +114,31 @@ def lead_dialog():
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
 
-        # -> diese Felder werden über Session-State vorbefüllt (siehe open_lead_dialog)
-        we_form   = st.number_input("Wohneinheiten", min_value=0, max_value=500, step=1, key="lead_we")
-        verb_form = st.number_input("Jahresverbrauch (kWh)", min_value=0, step=100, key="lead_verb")
+        # --- aus Sidebar vorbefüllt (via Session-State)
+        we_form    = st.number_input("Wohneinheiten", min_value=0, max_value=500,
+                                     step=1, key="lead_we")
+        verb_form  = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=0,
+                                     step=100, key="lead_verb")
+        pv_form    = st.number_input("PV-Anlage (kWp)", min_value=0.0, step=1.0,
+                                     key="lead_pv")
+
+        # Gewerbe (nur zeigen, wenn in der Sidebar aktiv)
+        ge_active = bool(st.session_state.get("lead_has_ge", False))
+        if ge_active:
+            ge_form = st.number_input("Jahresverbrauch Gewerbe (kWh)", min_value=0,
+                                      step=100, key="lead_ge")
+        else:
+            ge_form = 0
+            st.caption("Gewerbe: nicht aktiviert")
+
+        # Wärmepumpe (nur zeigen, wenn in der Sidebar aktiv)
+        wp_active = bool(st.session_state.get("lead_has_wp", False))
+        if wp_active:
+            wp_form = st.number_input("Wärmepumpenverbrauch (kWh)", min_value=0,
+                                      step=100, key="lead_wp")
+        else:
+            wp_form = 0
+            st.caption("Wärmepumpe: nicht aktiviert")
 
         msg     = st.text_area("Nachricht (optional)")
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
@@ -152,6 +146,7 @@ def lead_dialog():
         can_submit = all([name, email, strasse, plz, ort, consent])
         submitted = st.form_submit_button("Anfrage senden", type="primary",
                                           use_container_width=True, disabled=not can_submit)
+
         if submitted:
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
@@ -162,7 +157,10 @@ def lead_dialog():
 Objekt
 - Adresse: {strasse}, {plz} {ort}
 - Wohneinheiten: {we_form}
-- Jahresverbrauch: {verb_form} kWh
+- Jahresverbrauch Wohnungen: {verb_form} kWh
+- Gewerbe aktiv: {"Ja" if ge_active else "Nein"}{f" (Verbrauch: {ge_form} kWh)" if ge_active else ""}
+- Wärmepumpe aktiv: {"Ja" if wp_active else "Nein"}{f" (Verbrauch: {wp_form} kWh)" if wp_active else ""}
+- PV-Anlage: {pv_form} kWp
 
 Nachricht
 {msg}
@@ -170,25 +168,22 @@ Nachricht
 Meta
 - Timestamp: {datetime.now().isoformat()}
 """
-            # optionales Logging
+
+            # Optionales Logging in Session
             st.session_state.setdefault("leads", []).append({
-                "ts": datetime.now().isoformat(), "name": name, "email": email,
-                "tel": tel, "strasse": strasse, "plz": plz, "ort": ort,
-                "we": int(we_form), "verbrauch": int(verb_form), "msg": msg
+                "ts": datetime.now().isoformat(),
+                "name": name, "email": email, "tel": tel,
+                "strasse": strasse, "plz": plz, "ort": ort,
+                "we": int(we_form), "verbrauch_we": int(verb_form),
+                "ge_aktiv": ge_active, "verbrauch_ge": int(ge_form) if ge_active else 0,
+                "wp_aktiv": wp_active, "verbrauch_wp": int(wp_form) if wp_active else 0,
+                "pv_kwp": float(pv_form),
+                "msg": msg,
             })
 
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
             st.stop()
-
-# --- Wrapper: übernimmt aktuelle Sidebar-Werte und öffnet den Dialog ---
-def open_lead_dialog():
-    st.session_state["lead_we"] = int(we)              # aktuelle Sidebar-Werte
-    st.session_state["lead_verb"] = int(we_verbrauch)  # hier übernehmen
-    lead_dialog()
-
-# CTA-Button irgendwo im Hauptbereich:
-st.button("Mieterstromangebot anfragen", type="primary", on_click=open_lead_dialog)
 
 st.markdown("***")
 
