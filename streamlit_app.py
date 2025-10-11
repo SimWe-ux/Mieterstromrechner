@@ -97,10 +97,6 @@ st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 # ---- Lead Formular ----
-with st.sidebar:
-    we = st.slider("Anzahl Wohneinheiten", 1, 25, 2, 1, key="we")
-    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", 1500, 100000, 2500, 100, key="we_verbrauch")
-
 TO = "simon.wedeking@gmx.de"
 
 def send_via_mailto(subject: str, body: str):
@@ -117,11 +113,6 @@ def lead_dialog():
         plz     = st.text_input("Objekt PLZ *", max_chars=5)
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
-
-        # Defaults NUR aus der Sidebar lesen (nicht zurückschreiben)
-        we_default   = int(st.session_state.get("we", 2))
-        verb_default = int(st.session_state.get("we_verbrauch", 2500))
-
         we_form   = st.number_input("Wohneinheiten", 1, 500, we_default, 1, key="lead_we")
         verb_form = st.number_input("Jahresverbrauch gesamt (kWh)", 0, value=verb_default, step=100, key="lead_verb")
 
