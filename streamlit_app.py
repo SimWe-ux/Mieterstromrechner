@@ -53,8 +53,8 @@ sim = M.simulate_hourly()
 S = sim["summen"]
 
 col1, col2 = st.columns(2)
-col1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
-col2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %") 
+col1.badge("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
+col2.badge("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %") 
 
 # ---- Abbildung Jahresverlauf----
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
@@ -96,15 +96,6 @@ df_long = df_plot.reset_index(drop=True).melt(
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 st.subheader("Jahreswerte im Überblick")
-
-with st.container(border=True):
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("PV-Erzeugung", f"{S.pv_erzeugung_kwh:,.0f} kWh")
-        st.metric("Eigenverbrauch im Jahr", f"{S.eigenverbrauch_kwh:,.0f} kWh")
-    with col2:
-        st.metric("Netzeinspeisung", f"{S.netzeinspeisung_kwh:,.0f} kWh")
-        st.metric("Netzbezug", f"{S.netzbezug_kwh:,.0f} kWh")
 
 def metric_card(col, label, value, delta=None):
     with col.container(border=True):
