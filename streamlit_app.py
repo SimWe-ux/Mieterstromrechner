@@ -117,50 +117,49 @@ def lead_dialog():
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
 
-    with st.expander("Mieterstrom Daten", expanded=False):
-        st.caption("Diese Werte kommen aus der linken Seitenleiste und sind hier schreibgeschützt.")
-        # --- Read-only Spiegel aus Sidebar:
-        st.number_input(
-            "Wohneinheiten", min_value=0, max_value=500, step=1,
-            value=int(st.session_state.get("lead_we", 0)), disabled=True
-        )
-        st.number_input(
-            "Jahresverbrauch Wohnungen (kWh)", min_value=0, step=100,
-            value=int(st.session_state.get("lead_verb", 0)), disabled=True
-        )
-        st.number_input(
-            "PV-Anlage (kWp)", min_value=0.0, step=1.0,
-            value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
-        )
-
-        # --- Optional editierbar anzeigen, wenn aktiv:
-        ge_active = bool(st.session_state.get("lead_has_ge", False))
-        if ge_active:
-            ge_form = st.number_input(
-                "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
-                value=int(st.session_state.get("lead_ge", 0)), disabled=True
+        with st.expander("Mieterstrom Daten", expanded=False):
+            st.caption("Diese Werte kommen aus der linken Seitenleiste und sind hier schreibgeschützt.")
+            # --- Read-only Spiegel aus Sidebar:
+            st.number_input(
+                "Wohneinheiten", min_value=0, max_value=500, step=1,
+                value=int(st.session_state.get("lead_we", 0)), disabled=True
             )
-        else:
-            ge_form = 0
-            st.caption("Gewerbe: nicht aktiviert")
-
-        wp_active = bool(st.session_state.get("lead_has_wp", False))
-        if wp_active:
-            wp_form = st.number_input(
-                "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
-                value=int(st.session_state.get("lead_wp", 0)), disabled=True
+            st.number_input(
+                "Jahresverbrauch Wohnungen (kWh)", min_value=0, step=100,
+                value=int(st.session_state.get("lead_verb", 0)), disabled=True
             )
-        else:
-            wp_form = 0
-            st.caption("Wärmepumpe: nicht aktiviert")
-
-        msg     = st.text_area("Nachricht (optional)")
-        consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
-
-        can_submit = all([name, email, strasse, plz, ort, consent])
-        submitted = st.form_submit_button(
-            "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
-        )
+            st.number_input(
+                "PV-Anlage (kWp)", min_value=0.0, step=1.0,
+                value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
+            )
+    
+            ge_active = bool(st.session_state.get("lead_has_ge", False))
+            if ge_active:
+                ge_form = st.number_input(
+                    "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
+                    value=int(st.session_state.get("lead_ge", 0)), disabled=True
+                )
+            else:
+                ge_form = 0
+                st.caption("Gewerbe: nicht aktiviert")
+    
+            wp_active = bool(st.session_state.get("lead_has_wp", False))
+            if wp_active:
+                wp_form = st.number_input(
+                    "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
+                    value=int(st.session_state.get("lead_wp", 0)), disabled=True
+                )
+            else:
+                wp_form = 0
+                st.caption("Wärmepumpe: nicht aktiviert")
+    
+            msg     = st.text_area("Nachricht (optional)")
+            consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
+    
+            can_submit = all([name, email, strasse, plz, ort, consent])
+            submitted = st.form_submit_button(
+                "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
+            )
 
         if submitted:
             we_val   = int(st.session_state.get("lead_we", 0))
@@ -217,9 +216,9 @@ def open_lead_dialog():
 
     lead_dialog()
 
-# Irgendwo auf der Seite (z. B. unter KPIs / Spalte 3)
 st.button("Mieterstromangebot anfragen", type="primary",
           use_container_width=True, on_click=open_lead_dialog)
+
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
