@@ -18,21 +18,21 @@ with st.sidebar:
     
     # Wohneinheiten & Jahresverbrauch 
     we = st.slider("Anzahl Wohneinheiten", min_value=1, max_value=25, value=2, step=1)
-    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen", min_value=1500, max_value=100000, value=2500, step=100)
+    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=1500, max_value=100000, value=2500, step=100)
 
     # Wenn Gewerbeeinheiten vorhanden 
     has_ge = st.toggle("Gewerbeeinheiten vorhanden?", value=False)
     if has_ge: #
-        ge_verbrauch = st.number_input("Jahresverbrauch Gewerbeeinheiten", min_value=2500, max_value=100000, value=2500, step=100)  
+        ge_verbrauch = st.number_input("Jahresverbrauch Gewerbeeinheiten (kWh)", min_value=2500, max_value=100000, value=2500, step=100)  
    
     # PV Anlage ] Speicher 
-    pv = st.slider("PV-Anlage", min_value=1, max_value=100, value=10, step=1)
-    speicher = st.slider("Speichergröße", min_value=0, max_value=100, value=0, step=1)
+    pv = st.slider("PV-Anlage (kWp)", min_value=1, max_value=100, value=10, step=1)
+    speicher = st.slider("Speichergröße (kWh)", min_value=0, max_value=100, value=0, step=1)
 
     # Wenn Wärmepumpe vorhanden 
     has_wp = st.toggle("Wärmepumpe vorhanden?", value=False)   
     if has_wp: #
-        wp_verbrauch = st.number_input("Wärmepumpenverbrauch", min_value=1000, max_value=100000, value=2500, step=100)  
+        wp_verbrauch = st.number_input("Wärmepumpenverbrauch (kWh)", min_value=1000, max_value=100000, value=2500, step=100)  
 
 # ----Mapping in Configurations.py---
 C.wohneinheiten = int(we)
