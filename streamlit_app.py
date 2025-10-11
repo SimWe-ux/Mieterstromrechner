@@ -72,6 +72,16 @@ st.markdown("***")
 k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.header("Wirtschaftlichkeit")
 
+def metric_card(col, label, value, delta=None):
+    with col.container(border=True):
+        st.metric(label, value, delta)
+
+row1 = st.columns(2, gap="medium")
+row2 = st.columns(2, gap="medium")
+
+metric_card(row1[0], "Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
+metric_card(row1[1], "Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
+
 col1, col2 = st.columns(2)
 col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
 col2.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
