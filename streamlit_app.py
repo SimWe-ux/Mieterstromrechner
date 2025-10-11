@@ -63,7 +63,8 @@ def monthly_sum(series):
     idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
     s = pd.Series(series, index=idx, dtype=float)
     return s.resample("M").sum()  # 12 Summen Jan..Dez
-
+    
+gesamt_m  = monthly_sum(R["gesamtverbrauch"])
 pv_m      = monthly_sum(R["pv_prod"])
 ev_m      = monthly_sum(R["eigenverbrauch"])
 batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
@@ -72,6 +73,7 @@ grid_m    = monthly_sum(R["netzbezug"])
 
 df_m = pd.concat(
     [
+        gesamt_m.rename("Gesamtverbrauch[kWh]"),
         pv_m.rename("PV-Erzeugung[kWh]"),
         ev_m.rename("Eigenverbrauch[kWh]"),
         batt_outm.rename("Batterie-Entladung[kWh]"),
