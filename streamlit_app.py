@@ -108,67 +108,85 @@ def send_via_mailto(subject: str, body: str):
 
 @st.dialog("Mieterstrom – Projektanmeldung")
 def lead_dialog():
+    # Alles im Formular halten (wichtig für st.form_submit_button)
     with st.form("lead_form", clear_on_submit=True):
         # --- Kontakt
-        name    = st.text_input("Ihr Name *")
-        email   = st.text_input("Ihre E-Mail *")
-        strasse = st.text_input("Objekt Straße & Hausnummer *")
-        plz     = st.text_input("Objekt PLZ *", max_chars=5)
-        ort     = st.text_input("Ort *")
-        tel     = st.text_input("Telefon")
+        colA, colB = st.columns(2)
+        with colA:
+            name  = st.text_input("Ihr Name *")
+            email = st.text_input("Ihre E-Mail *")
+            tel   = st.text_input("Telefon")
+        with colB:
+            strasse = st.text_input("Objekt Straße & Hausnummer *")
+            plz     = st.text_input("Objekt PLZ *", max_chars=5)
+            ort     = st.text_input("Ort *")
 
+        # --- Mieterstrom-Daten (read-only aus der Sidebar, aufklappbar)
         with st.expander("Mieterstrom Daten", expanded=False):
             st.caption("Diese Werte kommen aus der linken Seitenleiste und sind hier schreibgeschützt.")
-            # --- Read-only Spiegel aus Sidebar:
+
             st.number_input(
                 "Wohneinheiten", min_value=0, max_value=500, step=1,
-                value=int(st.session_state.get("lead_we", 0)), disabled=True
+                value=int(st.session_state.get("lead_we", 0)),
+                disabled=True, key="ro_we"
             )
             st.number_input(
                 "Jahresverbrauch Wohnungen (kWh)", min_value=0, step=100,
-                value=int(st.session_state.get("lead_verb", 0)), disabled=True
+                value=int(st.session_state.get("lead_verb", 0)),
+                disabled=True, key="ro_verb"
             )
             st.number_input(
                 "PV-Anlage (kWp)", min_value=0.0, step=1.0,
-                value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
+                value=float(st.session_state.get("lead_pv", 0.0)),
+                disabled=True, key="ro_pv"
             )
-             st.number_input(
+            st.number_input(
                 "Speicher (kWh)", min_value=0.0, step=1.0,
-                value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
+                value=float(st.session_state.get("lead_sp", 0.0)),
+                disabled=True, key="ro_sp"
             )
+
             ge_active = bool(st.session_state.get("lead_has_ge", False))
             if ge_active:
                 ge_form = st.number_input(
                     "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
-                    value=int(st.session_state.get("lead_ge", 0)), disabled=True
+                    value=int(st.session_state.get("lead_ge", 0)),
+                    disabled=True, key="ro_ge"
                 )
             else:
                 ge_form = 0
                 st.caption("Gewerbe: nicht aktiviert")
-    
+
             wp_active = bool(st.session_state.get("lead_has_wp", False))
             if wp_active:
                 wp_form = st.number_input(
                     "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
-                    value=int(st.session_state.get("lead_wp", 0)), disabled=True
+                    value=int(st.session_state.get("lead_wp", 0)),
+                    disabled=True, key="ro_wp"
                 )
             else:
                 wp_form = 0
                 st.caption("Wärmepumpe: nicht aktiviert")
-    
+
+        # --- Nachricht & Einwilligung
         msg     = st.text_area("Nachricht (optional)")
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
-    
+
         can_submit = all([name, email, strasse, plz, ort, consent])
         submitted = st.form_submit_button(
-             "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
-            )
+            "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
+        )
 
         if submitted:
-            we_val   = int(st.session_state.get("lead_we", 0))
-            verb_val = int(st.session_state.get("lead_verb", 0))
-            pv_val   = float(st.session_state.get("lead_pv", 0.0))
-            sp_val   = int(st.session_state.get("lead_sp", 0))
+            # Werte aus Session State (von open_lead_dialog gesetzt)
+            we_val    = int(st.session_state.get("lead_we", 0))
+            verb_val  = int(st.session_state.get("lead_verb", 0))
+            pv_val    = float(st.session_state.get("lead_pv", 0.0))
+            sp_val    = float(st.session_state.get("lead_sp", 0.0))
+            ge_active = bool(st.session_state.get("lead_has_ge", False))
+            wp_active = bool(st.session_state.get("lead_has_wp", False))
+            ge_val    = int(st.session_state.get("lead_ge", 0))
+            wp_val    = int(st.session_state.get("lead_wp", 0))
 
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
@@ -181,8 +199,9 @@ Objekt
 - Wohneinheiten: {we_val}
 - Jahresverbrauch Wohnungen: {verb_val} kWh
 - PV-Anlage: {pv_val} kWp
-- Gewerbe aktiv: {"Ja" if ge_active else "Nein"}{f" (Verbrauch: {ge_form} kWh)" if ge_active else ""}
-- Wärmepumpe aktiv: {"Ja" if wp_active else "Nein"}{f" (Verbrauch: {wp_form} kWh)" if wp_active else ""}
+- Speicher: {sp_val} kWh
+- Gewerbe aktiv: {"Ja" if ge_active else "Nein"}{f" (Verbrauch: {ge_val} kWh)" if ge_active else ""}
+- Wärmepumpe aktiv: {"Ja" if wp_active else "Nein"}{f" (Verbrauch: {wp_val} kWh)" if wp_active else ""}
 
 Nachricht
 {msg}
@@ -191,12 +210,27 @@ Meta
 - Timestamp: {datetime.now().isoformat()}
 """
 
+            # Optionales Logging
+            st.session_state.setdefault("leads", []).append({
+                "ts": datetime.now().isoformat(),
+                "name": name, "email": email, "tel": tel,
+                "strasse": strasse, "plz": plz, "ort": ort,
+                "we": we_val, "verbrauch_we": verb_val,
+                "pv_kwp": pv_val, "speicher_kwh": sp_val,
+                "ge_aktiv": ge_active, "verbrauch_ge": ge_val,
+                "wp_aktiv": wp_active, "verbrauch_wp": wp_val,
+                "msg": msg,
+            })
+
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
             st.stop()
 
-# ---- Werte aus Sidebar -> Session spiegeln & Dialog öffnen
 def open_lead_dialog():
+    """
+    Holt die aktuellen Werte aus der Sidebar und legt sie in st.session_state ab,
+    damit der Dialog sie direkt (read-only) anzeigen kann.
+    """
     st.session_state["lead_we"]    = int(we)
     st.session_state["lead_verb"]  = int(we_verbrauch)
     st.session_state["lead_pv"]    = float(pv)
@@ -210,8 +244,9 @@ def open_lead_dialog():
 
     lead_dialog()
 
-st.button("Mieterstromangebot anfragen", type="primary",
-          use_container_width=True, on_click=open_lead_dialog)
+# Call-to-Action (kannst du z.B. in Spalte 3 deiner KPI-Zeile platzieren)
+st.button("Mieterstromangebot anfragen",
+          type="primary", use_container_width=True, on_click=open_lead_dialog)
 
 st.markdown("***")
 
