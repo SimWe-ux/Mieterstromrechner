@@ -126,22 +126,22 @@ def lead_dialog():
             st.caption("Diese Werte kommen aus der linken Seitenleiste und sind hier schreibgeschützt.")
 
             st.number_input(
-                "Wohneinheiten", min_value=0, max_value=500, step=1,
+                "Wohneinheiten",
                 value=int(st.session_state.get("lead_we", 0)),
                 disabled=True, key="ro_we"
             )
             st.number_input(
-                "Jahresverbrauch Wohnungen (kWh)", min_value=0, step=100,
+                "Jahresverbrauch Wohnungen (kWh)",
                 value=int(st.session_state.get("lead_verb", 0)),
                 disabled=True, key="ro_verb"
             )
             st.number_input(
-                "PV-Anlage (kWp)", min_value=0.0, step=1.0,
+                "PV-Anlage (kWp)",
                 value=float(st.session_state.get("lead_pv", 0.0)),
                 disabled=True, key="ro_pv"
             )
             st.number_input(
-                "Speicher (kWh)", min_value=0.0, step=1.0,
+                "Speicher (kWh)",
                 value=float(st.session_state.get("lead_sp", 0.0)),
                 disabled=True, key="ro_sp"
             )
@@ -149,7 +149,7 @@ def lead_dialog():
             ge_active = bool(st.session_state.get("lead_has_ge", False))
             if ge_active:
                 ge_form = st.number_input(
-                    "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
+                    "Jahresverbrauch Gewerbe (kWh)",
                     value=int(st.session_state.get("lead_ge", 0)),
                     disabled=True, key="ro_ge"
                 )
@@ -160,7 +160,7 @@ def lead_dialog():
             wp_active = bool(st.session_state.get("lead_has_wp", False))
             if wp_active:
                 wp_form = st.number_input(
-                    "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
+                    "Wärmepumpenverbrauch (kWh)",
                     value=int(st.session_state.get("lead_wp", 0)),
                     disabled=True, key="ro_wp"
                 )
@@ -208,29 +208,13 @@ Nachricht
 
 Meta
 - Timestamp: {datetime.now().isoformat()}
-"""
-
-            # Optionales Logging
-            st.session_state.setdefault("leads", []).append({
-                "ts": datetime.now().isoformat(),
-                "name": name, "email": email, "tel": tel,
-                "strasse": strasse, "plz": plz, "ort": ort,
-                "we": we_val, "verbrauch_we": verb_val,
-                "pv_kwp": pv_val, "speicher_kwh": sp_val,
-                "ge_aktiv": ge_active, "verbrauch_ge": ge_val,
-                "wp_aktiv": wp_active, "verbrauch_wp": wp_val,
-                "msg": msg,
-            })
+""
 
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
             st.stop()
 
 def open_lead_dialog():
-    """
-    Holt die aktuellen Werte aus der Sidebar und legt sie in st.session_state ab,
-    damit der Dialog sie direkt (read-only) anzeigen kann.
-    """
     st.session_state["lead_we"]    = int(we)
     st.session_state["lead_verb"]  = int(we_verbrauch)
     st.session_state["lead_pv"]    = float(pv)
@@ -243,8 +227,7 @@ def open_lead_dialog():
     st.session_state["lead_wp"]     = int(wp_verbrauch) if has_wp else 0
 
     lead_dialog()
-
-# Call-to-Action (kannst du z.B. in Spalte 3 deiner KPI-Zeile platzieren)
+    
 st.button("Mieterstromangebot anfragen",
           type="primary", use_container_width=True, on_click=open_lead_dialog)
 
