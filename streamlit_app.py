@@ -54,6 +54,16 @@ S = sim["summen"]
 
 st.header("Unabhängigkeit")
 
+def metric_card(col, label, value, delta=None):
+    with col.container(border=True):
+        st.metric(label, value, delta)
+
+row1 = st.columns(2, gap="medium")
+row2 = st.columns(2, gap="medium")
+
+metric_card(row1[0], "Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
+metric_card(row2[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
+
 c1, c2 = st.columns(2)
 c1.metric("Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 c2.metric("Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
