@@ -79,13 +79,6 @@ col2.metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 col2.metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 col2.metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
 
-st.button(
-    "Mieterstromangebot anfragen",
-    type="primary",
-    use_container_width=True,
-    on_click=open_lead_dialog
-)
-
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
 cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
@@ -207,6 +200,13 @@ def open_lead_dialog():
 
     # Dialog öffnen
     lead_dialog()
+
+st.button(
+    "Mieterstromangebot anfragen",
+    type="primary",
+    use_container_width=True,
+    on_click=open_lead_dialog
+)
     
 st.markdown("***")
 
