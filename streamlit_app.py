@@ -106,7 +106,7 @@ def send_via_mailto(subject: str, body: str):
 @st.dialog("Mieterstrom – Projektanmeldung")
 def lead_dialog():
     with st.form("lead_form", clear_on_submit=True):
-        # --- Pflichtfelder
+        # --- Kontakt
         name    = st.text_input("Ihr Name *")
         email   = st.text_input("Ihre E-Mail *")
         strasse = st.text_input("Objekt Straße & Hausnummer *")
@@ -114,28 +114,38 @@ def lead_dialog():
         ort     = st.text_input("Ort *")
         tel     = st.text_input("Telefon")
 
-        # --- aus Sidebar vorbefüllt (via Session-State)
-        we_form    = st.number_input("Wohneinheiten", min_value=0, max_value=500,
-                                     step=1, key="lead_we")
-        verb_form  = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=0,
-                                     step=100, key="lead_verb")
-        pv_form    = st.number_input("PV-Anlage (kWp)", min_value=0.0, step=1.0,
-                                     key="lead_pv")
+        st.caption("Objektdaten (aus der linken Seitenleiste, nicht veränderbar)")
+        # --- Read-only Spiegel aus Sidebar:
+        st.number_input(
+            "Wohneinheiten", min_value=0, max_value=500, step=1,
+            value=int(st.session_state.get("lead_we", 0)), disabled=True
+        )
+        st.number_input(
+            "Jahresverbrauch Wohnungen (kWh)", min_value=0, step=100,
+            value=int(st.session_state.get("lead_verb", 0)), disabled=True
+        )
+        st.number_input(
+            "PV-Anlage (kWp)", min_value=0.0, step=1.0,
+            value=float(st.session_state.get("lead_pv", 0.0)), disabled=True
+        )
 
-        # Gewerbe (nur zeigen, wenn in der Sidebar aktiv)
+        # --- Optional editierbar anzeigen, wenn aktiv:
         ge_active = bool(st.session_state.get("lead_has_ge", False))
         if ge_active:
-            ge_form = st.number_input("Jahresverbrauch Gewerbe (kWh)", min_value=0,
-                                      step=100, key="lead_ge")
+            ge_form = st.number_input(
+                "Jahresverbrauch Gewerbe (kWh)", min_value=0, step=100,
+                value=int(st.session_state.get("lead_ge", 0))
+            )
         else:
             ge_form = 0
             st.caption("Gewerbe: nicht aktiviert")
 
-        # Wärmepumpe (nur zeigen, wenn in der Sidebar aktiv)
         wp_active = bool(st.session_state.get("lead_has_wp", False))
         if wp_active:
-            wp_form = st.number_input("Wärmepumpenverbrauch (kWh)", min_value=0,
-                                      step=100, key="lead_wp")
+            wp_form = st.number_input(
+                "Wärmepumpenverbrauch (kWh)", min_value=0, step=100,
+                value=int(st.session_state.get("lead_wp", 0))
+            )
         else:
             wp_form = 0
             st.caption("Wärmepumpe: nicht aktiviert")
@@ -144,10 +154,15 @@ def lead_dialog():
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
 
         can_submit = all([name, email, strasse, plz, ort, consent])
-        submitted = st.form_submit_button("Anfrage senden", type="primary",
-                                          use_container_width=True, disabled=not can_submit)
+        submitted = st.form_submit_button(
+            "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
+        )
 
         if submitted:
+            we_val   = int(st.session_state.get("lead_we", 0))
+            verb_val = int(st.session_state.get("lead_verb", 0))
+            pv_val   = float(st.session_state.get("lead_pv", 0.0))
+
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
 - Name: {name}
@@ -156,11 +171,11 @@ def lead_dialog():
 
 Objekt
 - Adresse: {strasse}, {plz} {ort}
-- Wohneinheiten: {we_form}
-- Jahresverbrauch Wohnungen: {verb_form} kWh
+- Wohneinheiten: {we_val}
+- Jahresverbrauch Wohnungen: {verb_val} kWh
+- PV-Anlage: {pv_val} kWp
 - Gewerbe aktiv: {"Ja" if ge_active else "Nein"}{f" (Verbrauch: {ge_form} kWh)" if ge_active else ""}
 - Wärmepumpe aktiv: {"Ja" if wp_active else "Nein"}{f" (Verbrauch: {wp_form} kWh)" if wp_active else ""}
-- PV-Anlage: {pv_form} kWp
 
 Nachricht
 {msg}
@@ -169,15 +184,14 @@ Meta
 - Timestamp: {datetime.now().isoformat()}
 """
 
-            # Optionales Logging in Session
+            # Optional: Logging
             st.session_state.setdefault("leads", []).append({
                 "ts": datetime.now().isoformat(),
                 "name": name, "email": email, "tel": tel,
                 "strasse": strasse, "plz": plz, "ort": ort,
-                "we": int(we_form), "verbrauch_we": int(verb_form),
+                "we": we_val, "verbrauch_we": verb_val, "pv_kwp": pv_val,
                 "ge_aktiv": ge_active, "verbrauch_ge": int(ge_form) if ge_active else 0,
                 "wp_aktiv": wp_active, "verbrauch_wp": int(wp_form) if wp_active else 0,
-                "pv_kwp": float(pv_form),
                 "msg": msg,
             })
 
@@ -185,10 +199,11 @@ Meta
             send_via_mailto(subject, body)
             st.stop()
 
+# ---- Werte aus Sidebar -> Session spiegeln & Dialog öffnen
 def open_lead_dialog():
-    # Werte aus der Sidebar in den Session-State spiegeln
     st.session_state["lead_we"]    = int(we)
     st.session_state["lead_verb"]  = int(we_verbrauch)
+    st.session_state["lead_pv"]    = float(pv)
 
     st.session_state["lead_has_ge"] = bool(has_ge)
     st.session_state["lead_ge"]     = int(ge_verbrauch) if has_ge else 0
@@ -196,18 +211,11 @@ def open_lead_dialog():
     st.session_state["lead_has_wp"] = bool(has_wp)
     st.session_state["lead_wp"]     = int(wp_verbrauch) if has_wp else 0
 
-    st.session_state["lead_pv"]     = float(pv)
-
-    # Dialog öffnen
     lead_dialog()
 
-st.button(
-    "Mieterstromangebot anfragen",
-    type="primary",
-    use_container_width=True,
-    on_click=open_lead_dialog
-)
-    
+# Irgendwo auf der Seite (z. B. unter KPIs / Spalte 3)
+st.button("Mieterstromangebot anfragen", type="primary",
+          use_container_width=True, on_click=open_lead_dialog)
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
