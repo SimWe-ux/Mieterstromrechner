@@ -122,26 +122,22 @@ def lead_dialog():
                 disabled=True, key="ro_sp"
             )
 
-            ge_active = bool(st.session_state.get("lead_has_ge", False))
-            if ge_active:
-                ge_form = st.number_input(
+            if bool(st.session_state.get("lead_has_ge", False)):
+                st.number_input(
                     "Jahresverbrauch Gewerbe (kWh)",
                     value=int(st.session_state.get("lead_ge", 0)),
                     disabled=True, key="ro_ge"
                 )
             else:
-                ge_form = 0
                 st.caption("Gewerbe: nicht aktiviert")
 
-            wp_active = bool(st.session_state.get("lead_has_wp", False))
-            if wp_active:
-                wp_form = st.number_input(
+            if bool(st.session_state.get("lead_has_wp", False)):
+                st.number_input(
                     "Wärmepumpenverbrauch (kWh)",
                     value=int(st.session_state.get("lead_wp", 0)),
                     disabled=True, key="ro_wp"
                 )
             else:
-                wp_form = 0
                 st.caption("Wärmepumpe: nicht aktiviert")
 
         # --- Nachricht & Einwilligung
@@ -149,21 +145,20 @@ def lead_dialog():
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
 
         can_submit = all([name, email, strasse, plz, ort, consent])
-        submitted = st.form_submit_button("Anfrage senden", type="primary", use_container_width=True)
+        submitted = st.form_submit_button(
+            "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
+        )
 
-if submitted:
-    missing = [label for label, ok in {
-        "Name": bool(name.strip()),
-        "E-Mail": bool(email.strip()),
-        "Straße & Hausnummer": bool(strasse.strip()),
-        "PLZ": bool(plz.strip()),
-        "Ort": bool(ort.strip()),
-        "Einwilligung": consent,
-    }.items() if not ok]
-
-    if missing:
-        st.error("Bitte ausfüllen: " + ", ".join(missing))
-        st.stop()
+        if submitted:
+            # Werte aus Session State (von open_lead_dialog gesetzt)
+            we_val    = int(st.session_state.get("lead_we", 0))
+            verb_val  = int(st.session_state.get("lead_verb", 0))
+            pv_val    = float(st.session_state.get("lead_pv", 0.0))
+            sp_val    = float(st.session_state.get("lead_sp", 0.0))
+            ge_active = bool(st.session_state.get("lead_has_ge", False))
+            wp_active = bool(st.session_state.get("lead_has_wp", False))
+            ge_val    = int(st.session_state.get("lead_ge", 0))
+            wp_val    = int(st.session_state.get("lead_wp", 0))
 
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
@@ -186,12 +181,12 @@ Nachricht
 Meta
 - Timestamp: {datetime.now().isoformat()}
 """
-
             st.success("Danke! Öffne dein Mailprogramm, um die Nachricht zu senden.")
             send_via_mailto(subject, body)
             st.stop()
 
 def open_lead_dialog():
+    # Werte aus deiner Sidebar in den Session-State spiegeln
     st.session_state["lead_we"]    = int(we)
     st.session_state["lead_verb"]  = int(we_verbrauch)
     st.session_state["lead_pv"]    = float(pv)
@@ -204,9 +199,13 @@ def open_lead_dialog():
     st.session_state["lead_wp"]     = int(wp_verbrauch) if has_wp else 0
 
     lead_dialog()
-    
-st.button("Mieterstromangebot anfragen",
-          type="primary", use_container_width=False, on_click=open_lead_dialog)
+
+st.button(
+    "Mieterstromangebot anfragen",
+    type="primary",
+    use_container_width=False,
+    on_click=open_lead_dialog
+)
 
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
