@@ -14,7 +14,7 @@ st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="ce
 st.title("Mieterstrom - Renditerechner")
 
 # ---- UI: Eingabe----
-    
+with st.sidebar:
     st.header("Immobilien Informationen")
     
     # Wohneinheiten & Jahresverbrauch 
