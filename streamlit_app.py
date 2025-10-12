@@ -10,7 +10,7 @@ from urllib.parse import quote
 from datetime import datetime
 
 # ----Seiteneinstellungen----
-st.set_page_config(page_title="Mieterstrom Rechner", page_icon="⚡", layout="centered")
+st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
 st.title("Mieterstrom - Renditerechner")
 
 # ---- UI: Eingabe----
@@ -242,12 +242,12 @@ def monthly_sum(series):
     s = pd.Series(series, index=idx, dtype=float)
     return s.resample("M").sum()
 
-    gesamt_m  = monthly_sum(R["gesamtverbrauch"])
-    pv_m      = monthly_sum(R["pv_prod"])
-    ev_m      = monthly_sum(R["eigenverbrauch"])
-    batt_outm = monthly_sum(R["batt_to_load"])
-    feedin_m  = monthly_sum(R["netzeinspeisung"])
-    grid_m    = monthly_sum(R["netzbezug"])
+gesamt_m  = monthly_sum(R["gesamtverbrauch"])
+pv_m      = monthly_sum(R["pv_prod"])
+ev_m      = monthly_sum(R["eigenverbrauch"])
+batt_outm = monthly_sum(R["batt_to_load"])
+feedin_m  = monthly_sum(R["netzeinspeisung"])
+grid_m    = monthly_sum(R["netzbezug"])
 
 df_m = pd.concat(
     [
@@ -285,7 +285,7 @@ def build_daily_df(month_num: int) -> pd.DataFrame:
 ctrl_col, chart_col = st.columns([1, 4])  # 1 : 4 ≈ “Spalte 2+3” für den Chart
 
 with ctrl_col:
-    st.subheader("Ansicht")
+    st.subheader("Detailansicht")
     view = st.radio(
         "Zeitraum",
         ["Jahr (Monate)", "Monat (Tage)"],
