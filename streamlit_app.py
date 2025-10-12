@@ -205,7 +205,7 @@ def open_lead_dialog():
     lead_dialog()
     
 st.button("Mieterstromangebot anfragen",
-          type="primary", use_container_width=True, on_click=open_lead_dialog)
+          type="primary", use_container_width=False, on_click=open_lead_dialog)
 
 # --- Abbildung Cashflows über 20 Jahre----
 cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
@@ -273,6 +273,8 @@ df_long = df_plot.reset_index(drop=True).melt(
 
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
+
+# ---- Werte im Überblick----
 st.subheader("Jahreswerte im Überblick")
 
 def metric_card(col, label, value, delta=None):
@@ -286,7 +288,6 @@ metric_card(row1[0], "PV-Erzeugung",        f"{S.pv_erzeugung_kwh:,.0f} kWh")
 metric_card(row1[1], "Eigenverbrauch (Jahr)", f"{S.eigenverbrauch_kwh:,.0f} kWh")
 metric_card(row2[0], "Netzeinspeisung",     f"{S.netzeinspeisung_kwh:,.0f} kWh")
 metric_card(row2[1], "Netzbezug",           f"{S.netzbezug_kwh:,.0f} kWh")
-
 
 with st.expander("Weitere Ergebnisse"):
     cols = st.columns(3)
