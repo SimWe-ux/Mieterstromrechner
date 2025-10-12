@@ -235,42 +235,46 @@ with st.expander("Weitere Ergebnisse"):
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
+
 R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
-# Monatslabels
-labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
-
-# ---- Helper zum Aggregieren ----
 def monthly_sum(series):
-    # 2021 = Nicht-Schaltjahr -> 8760 h
-    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")
+    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
     s = pd.Series(series, index=idx, dtype=float)
-    return s.resample("M").sum()
+    return s.resample("M").sum()  # 12 Summen Jan..Dez
 
-def daily_sum_for_month(series, month_num: int):
-    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")
-    s = pd.Series(series, index=idx, dtype=float)
-    s = s[s.index.month == month_num]
-    return s.resample("D").sum()
+gesamt_m  = monthly_sum(R["gesamtverbrauch"])
+pv_m      = monthly_sum(R["pv_prod"])
+ev_m      = monthly_sum(R["eigenverbrauch"])
+batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
+feedin_m  = monthly_sum(R["netzeinspeisung"])
+grid_m    = monthly_sum(R["netzbezug"])
 
-# Mapping: Anzeigename -> Keys in R
-series_map = {
-    "Gesamtverbrauch [kWh]":    "gesamtverbrauch",
-    "PV-Erzeugung [kWh]":       "pv_prod",
-    "Eigenverbrauch [kWh]":     "eigenverbrauch",
-    "Batterie-Entladung [kWh]": "batt_to_load",
-    "Netzeinspeisung [kWh]":    "netzeinspeisung",
-    "Netzbezug [kWh]":          "netzbezug",
-}
-
-# Monats-DataFrame robust in EINEM Schritt (vermeidet NameError)
 df_m = pd.concat(
-    {label: monthly_sum(R[key]) for label, key in series_map.items()},
-    axis=1
+    [
+        gesamt_m.rename("Gesamtverbrauch[kWh]"),
+        pv_m.rename("PV-Erzeugung[kWh]"),
+        ev_m.rename("Eigenverbrauch[kWh]"),
+        batt_outm.rename("Batterie-Entladung[kWh]"),
+        feedin_m.rename("Netzeinspeisung[kWh]"),
+        grid_m.rename("Netzbezug[kWh]"),
+    ],
+    axis=1,
 )
 
-# ==== Layout: Steuerung (Spalte 1) + Chart (breite Spalte 2) ====
-ctrl_col, chart_col = st.columns([1, 4], vertical_alignment="top")
+labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
+df_plot = df_m.copy()
+df_plot["MonatNum"] = df_plot.index.month
+df_plot["Monat"] = df_plot["MonatNum"].map(labels)
+
+df_long = df_plot.reset_index(drop=True).melt(
+    id_vars=["MonatNum","Monat"],
+    var_name="Serie",
+    value_name="kWh"
+)
+
+st.subheader("Monatswerte – Jahresverlauf")
+st.line_chart(df_m)
 
 with ctrl_col:
     st.subheader("Detailansicht")
@@ -279,14 +283,6 @@ with ctrl_col:
         ["Jahr (Monate)", "Monat (Tage)"],
         index=0,
         label_visibility="collapsed",
-    )
-
-    all_series = list(series_map.keys())
-    default_series = ["Gesamtverbrauch [kWh]", "PV-Erzeugung [kWh]", "Eigenverbrauch [kWh]"]
-    series_sel = st.multiselect(
-        "Serien",
-        options=all_series,
-        default=[s for s in default_series if s in all_series],
     )
 
     chart_kind = st.radio("Diagramm", ["Linie", "Fläche"], horizontal=True, index=0)
@@ -300,41 +296,6 @@ with ctrl_col:
             format_func=lambda m: labels[m],
         )
 
-with chart_col:
-    st.subheader("Energieverlauf")
-
-    if view == "Jahr (Monate)":
-        # gewünschte Kurven picken
-        cols = series_sel or all_series
-        data_to_plot = df_m[cols].copy()
-        # X-Achse als Monatsname
-        data_to_plot.index = data_to_plot.index.month.map(labels)
-
-        if chart_kind == "Fläche":
-            st.area_chart(data_to_plot, use_container_width=True)
-        else:
-            st.line_chart(data_to_plot, use_container_width=True)
-
-        st.caption("Monatssummen über das Jahr")
-
-    else:
-        # Tageswerte des gewählten Monats
-        df_day = pd.concat(
-            {label: daily_sum_for_month(R[key], month_num) for label, key in series_map.items()},
-            axis=1
-        )
-        cols = series_sel or list(series_map.keys())
-        data_to_plot = df_day[cols].copy()
-        # X-Achse als Tagesnummer
-        data_to_plot.index = data_to_plot.index.day
-
-        if chart_kind == "Fläche":
-            st.area_chart(data_to_plot, use_container_width=True)
-        else:
-            st.line_chart(data_to_plot, use_container_width=True)
-
-        st.caption(f"Tageswerte für {labels[month_num]}")
-        
 # ---- Werte im Überblick----
 st.subheader("Jahreswerte im Überblick")
 
