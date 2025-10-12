@@ -149,19 +149,21 @@ def lead_dialog():
         consent = st.checkbox("Ich stimme der Speicherung meiner Angaben zu. *")
 
         can_submit = all([name, email, strasse, plz, ort, consent])
-        submitted = st.form_submit_button(
-            "Anfrage senden", type="primary", use_container_width=True)
+        submitted = st.form_submit_button("Anfrage senden", type="primary", use_container_width=True)
 
         if submitted:
-            # Werte aus Session State (von open_lead_dialog gesetzt)
-            we_val    = int(st.session_state.get("lead_we", 0))
-            verb_val  = int(st.session_state.get("lead_verb", 0))
-            pv_val    = float(st.session_state.get("lead_pv", 0.0))
-            sp_val    = float(st.session_state.get("lead_sp", 0.0))
-            ge_active = bool(st.session_state.get("lead_has_ge", False))
-            wp_active = bool(st.session_state.get("lead_has_wp", False))
-            ge_val    = int(st.session_state.get("lead_ge", 0))
-            wp_val    = int(st.session_state.get("lead_wp", 0))
+    missing = [label for label, ok in {
+        "Name": bool(name.strip()),
+        "E-Mail": bool(email.strip()),
+        "Straße & Hausnummer": bool(strasse.strip()),
+        "PLZ": bool(plz.strip()),
+        "Ort": bool(ort.strip()),
+        "Einwilligung": consent,
+    }.items() if not ok]
+
+    if missing:
+        st.error("Bitte ausfüllen: " + ", ".join(missing))
+        st.stop()
 
             subject = f"Mieterstrom-Anmeldung: {strasse}, {plz} {ort}"
             body = f"""Kontakt
