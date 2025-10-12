@@ -150,8 +150,7 @@ def lead_dialog():
 
         can_submit = all([name, email, strasse, plz, ort, consent])
         submitted = st.form_submit_button(
-            "Anfrage senden", type="primary", use_container_width=True, disabled=not can_submit
-        )
+            "Anfrage senden", type="primary", use_container_width=True)
 
         if submitted:
             # Werte aus Session State (von open_lead_dialog gesetzt)
