@@ -151,7 +151,7 @@ def lead_dialog():
         can_submit = all([name, email, strasse, plz, ort, consent])
         submitted = st.form_submit_button("Anfrage senden", type="primary", use_container_width=True)
 
-        if submitted:
+    if submitted:
     missing = [label for label, ok in {
         "Name": bool(name.strip()),
         "E-Mail": bool(email.strip()),
