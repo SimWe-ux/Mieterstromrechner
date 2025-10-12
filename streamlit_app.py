@@ -10,7 +10,7 @@ from urllib.parse import quote
 from datetime import datetime
 
 # ----Seiteneinstellungen----
-st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
+st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="wide")
 st.title("Mieterstrom - Renditerechner")
 
 # ---- UI: Eingabe----
