@@ -242,12 +242,12 @@ def monthly_sum(series):
     s = pd.Series(series, index=idx, dtype=float)
     return s.resample("M").sum()
 
-gesamt_m  = monthly_sum(R["gesamtverbrauch"])
-pv_m      = monthly_sum(R["pv_prod"])
-ev_m      = monthly_sum(R["eigenverbrauch"])
-batt_outm = monthly_sum(R["batt_to_load"])
-feedin_m  = monthly_sum(R["netzeinspeisung"])
-grid_m    = monthly_sum(R["netzbezug"])
+    gesamt_m  = monthly_sum(R["gesamtverbrauch"])
+    pv_m      = monthly_sum(R["pv_prod"])
+    ev_m      = monthly_sum(R["eigenverbrauch"])
+    batt_outm = monthly_sum(R["batt_to_load"])
+    feedin_m  = monthly_sum(R["netzeinspeisung"])
+    grid_m    = monthly_sum(R["netzbezug"])
 
 df_m = pd.concat(
     [
