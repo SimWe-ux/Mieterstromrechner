@@ -285,26 +285,6 @@ horizon_map = {
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
-with ctrl_col:
-    st.subheader("Detailansicht")
-    view = st.radio(
-        "Zeitraum",
-        ["Jahr (Monate)", "Monat (Tage)"],
-        index=0,
-        label_visibility="collapsed",
-    )
-
-    chart_kind = st.radio("Diagramm", ["Linie", "Fläche"], horizontal=True, index=0)
-
-    month_num = 1
-    if view == "Monat (Tage)":
-        month_num = st.select_slider(
-            "Monat",
-            options=list(labels.keys()),
-            value=1,
-            format_func=lambda m: labels[m],
-        )
-
 # ---- Werte im Überblick----
 st.subheader("Jahreswerte im Überblick")
 
