@@ -16,6 +16,12 @@ st.title("Mieterstrom - Renditerechner")
 # ---- UI: Eingabe----
 
 with st.sidebar:
+    st.logo(
+    LOGO_URL_LARGE,
+    link="https://streamlit.io/gallery",
+    icon_image=LOGO_URL_SMALL,
+)
+    
     st.header("Immobilien Informationen")
     
     # Wohneinheiten & Jahresverbrauch 
