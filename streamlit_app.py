@@ -285,6 +285,62 @@ horizon_map = {
 st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
+labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
+
+# --- Monats-Summen (hast du oben schon berechnet)
+# df_m: DataFrame mit Monatssummen (Spalten: "Gesamtverbrauch[kWh]" usw.)
+
+# --- Tages-Summen für einen gewählten Monat
+def daily_sum_for_month(series, month_num: int):
+    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # Nicht-Schaltjahr
+    s = pd.Series(series, index=idx, dtype=float)
+    s = s[s.index.month == month_num]
+    return s.resample("D").sum()
+
+def build_daily_df(month_num: int) -> pd.DataFrame:
+    return pd.concat(
+        [
+            daily_sum_for_month(R["gesamtverbrauch"], month_num).rename("Gesamtverbrauch[kWh]"),
+            daily_sum_for_month(R["pv_prod"],         month_num).rename("PV-Erzeugung[kWh]"),
+            daily_sum_for_month(R["eigenverbrauch"],  month_num).rename("Eigenverbrauch[kWh]"),
+            daily_sum_for_month(R["batt_to_load"],    month_num).rename("Batterie-Entladung[kWh]"),
+            daily_sum_for_month(R["netzeinspeisung"], month_num).rename("Netzeinspeisung[kWh]"),
+            daily_sum_for_month(R["netzbezug"],       month_num).rename("Netzbezug[kWh]"),
+        ],
+        axis=1,
+    )
+
+# ===== Layout: Steuerung (schmal) + Chart (breit) =====
+ctrl_col, chart_col = st.columns([1, 4])
+
+with ctrl_col:
+    st.subheader("Zeitraum")
+    # „Pills“: Erstes Item = Gesamtes Jahr, danach die Monate
+    month_pills = ["Gesamtes Jahr"] + [labels[m] for m in range(1, 13)]
+    choice = st.pills("Auswahl", options=month_pills, default="Gesamtes Jahr")
+
+    chart_kind = st.radio("Diagramm", ["Linie", "Fläche"], horizontal=True, index=0)
+
+with chart_col:
+    st.subheader("Energieverlauf")
+    if choice == "Gesamtes Jahr":
+        data_to_plot = df_m
+        if chart_kind == "Fläche":
+            st.area_chart(data_to_plot, use_container_width=True)
+        else:
+            st.line_chart(data_to_plot, use_container_width=True)
+        st.caption("Monatssummen über das Jahr")
+    else:
+        # Gewählten Monatsnamen zurück in Monatszahl mappen
+        mon_num = list(labels.values()).index(choice) + 1
+        df_day = build_daily_df(mon_num)
+        if chart_kind == "Fläche":
+            st.area_chart(df_day, use_container_width=True)
+        else:
+            st.line_chart(df_day, use_container_width=True)
+        st.caption(f"Tageswerte für {choice}")
+        
+
 # ---- Werte im Überblick----
 st.subheader("Jahreswerte im Überblick")
 
