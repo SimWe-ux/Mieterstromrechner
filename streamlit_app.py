@@ -235,45 +235,102 @@ with st.expander("Weitere Ergebnisse"):
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
-R = sim["reihen"]  # stündliche Reihen aus dem Modell
+labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
 
 def monthly_sum(series):
     idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
     s = pd.Series(series, index=idx, dtype=float)
-    return s.resample("M").sum()  # 12 Summen Jan..Dez
-    
+    return s.resample("M").sum()
+
 gesamt_m  = monthly_sum(R["gesamtverbrauch"])
 pv_m      = monthly_sum(R["pv_prod"])
 ev_m      = monthly_sum(R["eigenverbrauch"])
-batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
+batt_outm = monthly_sum(R["batt_to_load"])
 feedin_m  = monthly_sum(R["netzeinspeisung"])
 grid_m    = monthly_sum(R["netzbezug"])
 
 df_m = pd.concat(
     [
-        gesamt_m.rename("Gesamtverbrauch[kWh]"),
-        pv_m.rename("PV-Erzeugung[kWh]"),
-        ev_m.rename("Eigenverbrauch[kWh]"),
-        batt_outm.rename("Batterie-Entladung[kWh]"),
-        feedin_m.rename("Netzeinspeisung[kWh]"),
-        grid_m.rename("Netzbezug[kWh]"),
+        gesamt_m.rename("Gesamtverbrauch [kWh]"),
+        pv_m.rename("PV-Erzeugung [kWh]"),
+        ev_m.rename("Eigenverbrauch [kWh]"),
+        batt_outm.rename("Batterie-Entladung [kWh]"),
+        feedin_m.rename("Netzeinspeisung [kWh]"),
+        grid_m.rename("Netzbezug [kWh]"),
     ],
     axis=1,
 )
-labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
-df_plot = df_m.copy()
-df_plot["MonatNum"] = df_plot.index.month
-df_plot["Monat"] = df_plot["MonatNum"].map(labels)
 
-df_long = df_plot.reset_index(drop=True).melt(
-    id_vars=["MonatNum","Monat"],
-    var_name="Serie",
-    value_name="kWh"
-)
+# Tages-Summen für einen gewählten Monat
+def daily_sum_for_month(series, month_num: int):
+    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")
+    s = pd.Series(series, index=idx, dtype=float)
+    s = s[s.index.month == month_num]
+    return s.resample("D").sum()
 
-st.subheader("Monatswerte – Jahresverlauf")
-st.line_chart(df_m)
+def build_daily_df(month_num: int) -> pd.DataFrame:
+    return pd.concat(
+        [
+            daily_sum_for_month(R["gesamtverbrauch"], month_num).rename("Gesamtverbrauch [kWh]"),
+            daily_sum_for_month(R["pv_prod"],         month_num).rename("PV-Erzeugung [kWh]"),
+            daily_sum_for_month(R["eigenverbrauch"],  month_num).rename("Eigenverbrauch [kWh]"),
+            daily_sum_for_month(R["batt_to_load"],    month_num).rename("Batterie-Entladung [kWh]"),
+            daily_sum_for_month(R["netzeinspeisung"], month_num).rename("Netzeinspeisung [kWh]"),
+            daily_sum_for_month(R["netzbezug"],       month_num).rename("Netzbezug [kWh]"),
+        ],
+        axis=1,
+    )
 
+# ==== Layout: Steuerung (Spalte 1) + Chart (breite Spalte 2) ====
+ctrl_col, chart_col = st.columns([1, 4])  # 1 : 4 ≈ “Spalte 2+3” für den Chart
+
+with ctrl_col:
+    st.subheader("Ansicht")
+    view = st.radio(
+        "Zeitraum",
+        ["Jahr (Monate)", "Monat (Tage)"],
+        index=0,
+        label_visibility="collapsed",
+    )
+
+    # Serien-Auswahl (wir zeigen standardmäßig ein paar sinnvolle)
+    all_series = list(df_m.columns)
+    default_series = ["Gesamtverbrauch [kWh]", "PV-Erzeugung [kWh]", "Eigenverbrauch [kWh]"]
+    series_sel = st.multiselect(
+        "Serien",
+        options=all_series,
+        default=[s for s in default_series if s in all_series],
+    )
+
+    chart_kind = st.radio("Diagramm", ["Linie", "Fläche"], horizontal=True, index=0)
+
+    month_num = 1
+    if view == "Monat (Tage)":
+        month_num = st.select_slider(
+            "Monat",
+            options=list(labels.keys()),
+            value=1,
+            format_func=lambda m: labels[m],
+        )
+
+with chart_col:
+    st.subheader("Energieverlauf")
+    if view == "Jahr (Monate)":
+        data_to_plot = df_m[series_sel] if series_sel else df_m
+        if chart_kind == "Fläche":
+            st.area_chart(data_to_plot, use_container_width=True)
+        else:
+            st.line_chart(data_to_plot, use_container_width=True)
+        st.caption("Monatssummen über das Jahr")
+    else:
+        df_day = build_daily_df(month_num)
+        data_to_plot = df_day[series_sel] if series_sel else df_day
+        if chart_kind == "Fläche":
+            st.area_chart(data_to_plot, use_container_width=True)
+        else:
+            st.line_chart(data_to_plot, use_container_width=True)
+        st.caption(f"Tageswerte für {labels[month_num]}")
+        
 # ---- Werte im Überblick----
 st.subheader("Jahreswerte im Überblick")
 
