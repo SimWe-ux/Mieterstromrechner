@@ -12,8 +12,8 @@ from datetime import datetime
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
 st.title("Mieterstrom - Renditerechner")
-
-#----Wohneinheiten mit Gesamtverbruach verknüpft----
+        
+#---- Wohneinheiten mit Gesamtverbruacht verknüpft----
 if "we" not in st.session_state:
     st.session_state.we = 2
 if "auto_we_verb" not in st.session_state:
