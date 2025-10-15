@@ -13,6 +13,19 @@ from datetime import datetime
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
 st.title("Mieterstrom - Renditerechner")
 
+#----Wohneinheiten mit Gesamtverbruach verknüpft----
+if "we" not in st.session_state:
+    st.session_state.we = 2
+if "auto_we_verb" not in st.session_state:
+    st.session_state.auto_we_verb = True
+if "we_verbrauch" not in st.session_state:
+    st.session_state.we_verbrauch = st.session_state.we * 2400  # kWh
+
+def _recalc_if_auto():
+    """Wird gerufen, wenn WE oder der Auto-Schalter sich ändern."""
+    if st.session_state.auto_we_verb:
+        st.session_state.we_verbrauch = int(st.session_state.we) * 2400
+        
 # ---- UI: Eingabe----
 with st.sidebar:
     st.header("Immobilien Informationen")
