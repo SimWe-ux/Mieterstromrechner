@@ -94,15 +94,9 @@ st.markdown("***")
 k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.header("Wirtschaftlichkeit")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
 col2.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
-col3.st.button(
-    "Mieterstromangebot anfragen",
-    type="primary",
-    use_container_width=False,
-    on_click=open_lead_dialog
-)
 
 # --- Dialog / Formular ---
 TO = "simon.wedeking@gmx.de"
