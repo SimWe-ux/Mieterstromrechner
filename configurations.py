@@ -1,6 +1,6 @@
 # ----Variablen aus UI Einagbe----
-C.wohneinheiten = int(st.session_state.we)
-C.wohnungen_verbrauch_kwh = float(st.session_state.we_verbrauch)
+wohneinheiten: int = 2
+wohnungen_verbrauch_kwh: float = 5_000.0  
 
 pv_kwp: float = 10.0
 speicher_kwh: float = 0.0
