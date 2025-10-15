@@ -294,15 +294,15 @@ with st.expander("Weitere Ergebnisse"):
     cols = st.columns(3)
     
     # immer
-    cols[0].metric("Eigenverbrauch Wohnungen", f"{S.eigenverbrauch_wohnung_kwh:,.0f} kWh")
+    cols[0].metric("PV Eigenverbrauch Wohnungen", f"{S.eigenverbrauch_wohnung_kwh:,.0f} kWh")
 
     # optional: Gewerbe
     if getattr(C, "gewerbe_aktiv", False):
-        cols[1].metric("Eigenverbrauch Gewerbe", f"{S.eigenverbrauch_gewerbe_kwh:,.0f} kWh")
+        cols[1].metric("PV Eigenverbrauch Gewerbe", f"{S.eigenverbrauch_gewerbe_kwh:,.0f} kWh")
 
     # optional: Wärmepumpe
     if getattr(C, "wp_aktiv", False):
-        cols[2].metric("Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
+        cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
 
         
 st.markdown("***")
