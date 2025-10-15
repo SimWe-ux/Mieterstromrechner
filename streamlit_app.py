@@ -50,8 +50,8 @@ with st.sidebar:
         ge_verbrauch = st.number_input("Jahresverbrauch Gewerbeeinheiten (kWh)", min_value=2500, max_value=100000, value=2500, step=100)  
         
     # PV Anlage ] Speicher 
-    pv = st.number_input("PV-Anlage (kWp)", min_value=1, max_value=100, value=10, step=1)
-    speicher = st.number_input("Speichergröße (kWh)", min_value=0, max_value=100, value=0, step=1)
+    pv = st.slider("PV-Anlage (kWp)", min_value=1, max_value=99, value=10, step=1)
+    speicher = st.slider("Speichergröße (kWh)", min_value=0, max_value=99, value=0, step=1)
 
     # Wenn Wärmepumpe vorhanden 
     has_wp = st.toggle("Wärmepumpe vorhanden?", value=False)   
