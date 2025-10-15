@@ -29,8 +29,33 @@ def _recalc_if_auto():
 # ---- UI: Eingabe----
 with st.sidebar:
     st.header("Immobilien Informationen")
-    
-    # Wohneinheiten & Jahresverbrauch 
+
+    # 1) Schalter für Auto-Berechnung
+    st.toggle(
+        "Automatisch: 2400 kWh pro Wohneinheit",
+        key="auto_we_verb",
+        value=st.session_state.auto_we_verb,
+        help="Wenn aktiv, wird der Jahresverbrauch = WE × 2400 kWh gesetzt.",
+        on_change=_recalc_if_auto,
+    )
+
+    # 2) Wohneinheiten-Slider (triggert bei Änderung die Neuberechnung)
+    st.slider(
+        "Anzahl Wohneinheiten",
+        min_value=0, max_value=25, step=1,
+        key="we",
+        on_change=_recalc_if_auto,
+    )
+
+    # 3) Jahresverbrauch – ist gesperrt, solange Auto aktiv ist
+    st.number_input(
+        "Jahresverbrauch Wohnungen (kWh)",
+        min_value=0, max_value=100_000, step=100,
+        key="we_verbrauch",
+        disabled=st.session_state.auto_we_verb,
+        help="Bei aktivem Auto-Modus: WE × 2400 kWh. Sonst manuell einstellbar.",
+    )
+        # Wohneinheiten & Jahresverbrauch 
     we = st.slider("Anzahl Wohneinheiten", min_value=0, max_value=25, value=2, step=1)
     we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=1000, max_value=100000, value=2500, step=100)
 
