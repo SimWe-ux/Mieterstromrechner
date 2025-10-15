@@ -12,14 +12,38 @@ from datetime import datetime
 # ----Seiteneinstellungen----
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
 st.title("Mieterstrom - Renditerechner")
+
+# ---- Verknüpfung WE und Verbrauch----
+
+if "we" not in st.session_state:
+    st.session_state.we = 2
+if "we_verbrauch" not in st.session_state:
+    st.session_state.we_verbrauch = st.session_state.we * 2400  # kWh
+
+def _sync_we_to_verbrauch():
+    """Bei Änderung der Wohneinheiten -> Verbrauch = WE × 2400."""
+    st.session_state.we_verbrauch = int(st.session_state.we) * 2400
         
 # ---- UI: Eingabe----
 with st.sidebar:
     st.header("Immobilien Informationen")
         
-        # Wohneinheiten & Jahresverbrauch 
-    we = st.slider("Anzahl Wohneinheiten", min_value=0, max_value=25, value=2, step=1)
-    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=1000, max_value=100000, value=2500, step=100)
+# Ändert man WE, wird we_verbrauch automatisch neu gesetzt
+    st.slider(
+        "Anzahl Wohneinheiten",
+        min_value=0, max_value=25, step=1,
+        key="we",
+        on_change=_sync_we_to_verbrauch,
+    )
+
+# Dieses Feld kann danach frei manuell angepasst werden
+    st.number_input(
+        "Jahresverbrauch Wohnungen (kWh)",
+        min_value=0, max_value=100_000, step=100,
+        key="we_verbrauch",
+        help="Wird bei Änderung der WE automatisch auf WE × 2400 gesetzt; danach frei editierbar.",
+    )
+
 
     # Wenn Gewerbeeinheiten vorhanden 
     has_ge = st.toggle("Gewerbeeinheiten vorhanden?", value=False)
