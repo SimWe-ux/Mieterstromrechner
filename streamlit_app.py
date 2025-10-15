@@ -43,17 +43,6 @@ with st.sidebar:
         key="we_verbrauch",
         help="Wird bei Änderung der WE automatisch auf WE × 2400 gesetzt; danach frei editierbar.",
     )
-
-
-    # Wohneinheiten & Jahresverbrauch 
-    we = st.slider("Anzahl Wohneinheiten", min_value=0, max_value=25, value=2, step=1)
-    we_verbrauch = st.number_input("Jahresverbrauch Wohnungen (kWh)", min_value=1000, max_value=100000, value=2500, step=100)
-    
-    # Wenn Gewerbeeinheiten vorhanden 
-    has_ge = st.toggle("Gewerbeeinheiten vorhanden?", value=False)
-    if has_ge: #
-        ge_verbrauch = st.number_input("Jahresverbrauch Gewerbeeinheiten (kWh)", min_value=2500, max_value=100000, value=2500, step=100)  
-
     
     # PV Anlage ] Speicher 
     pv = st.slider("PV-Anlage (kWp)", min_value=1, max_value=100, value=10, step=1)
