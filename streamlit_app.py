@@ -29,7 +29,6 @@ if not st.session_state.show_calculator:
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown('<div class="hero-card">', unsafe_allow_html=True)
         st.caption("Willkommen bei Ihrem digitalen Energieberater")
         st.markdown('<div class="hero-title">Wir machen Ihr Mehrfamilienhaus fit für Mieterstrom.</div>', unsafe_allow_html=True)
         st.markdown(
