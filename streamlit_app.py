@@ -13,8 +13,59 @@ from datetime import datetime
 st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
 st.title("Mieterstrom - Renditerechner")
 
-# ---- Verknüpfung WE und Verbrauch----
+# Gate: Sneak Peak anzeigen dann Rechner 
+if "show_calculator" not in st.session_state:
+    st.session_state.show_calculator = False
 
+if not st.session_state.show_calculator:
+    # --- optionales CSS für hübsches Card-Design
+    st.markdown("""
+    <style>
+      .hero-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:18px}
+      .hero-title{font-size:2.4rem;font-weight:800;margin:0 0 8px 0}
+      .hero-lead{color:#334155;margin-bottom:18px}
+      .hero-bullets li{margin:8px 0}
+    </style>
+    """, unsafe_allow_html=True)
+
+    with st.container():
+        col_img, col_text = st.columns([5,7], gap="large")
+
+        # --- LINKS: Illustration (nimm deine Grafik-Datei)
+        with col_img:
+            # Lege ein Bild unter ./assets/haus_pv_mieterstrom.png ab
+            st.image("assets/haus_pv_mieterstrom.png", use_container_width=True)
+
+        # --- RECHTS: Headline, Nutzen & CTA
+        with col_text:
+            st.markdown('<div class="hero-card">', unsafe_allow_html=True)
+            st.caption("Willkommen bei Ihrem digitalen Energieberater")
+            st.markdown('<div class="hero-title">Wir machen Ihr Mehrfamilienhaus fit für Mieterstrom.</div>', unsafe_allow_html=True)
+            st.markdown(
+                "<p class='hero-lead'>PV auf dem Dach, Speicher im Haus und Strom für Ihre Mieter – "
+                "inkl. Wirtschaftlichkeits­berechnung und CO₂-Einsparungen.</p>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                "<ul class='hero-bullets'>"
+                "<li>✅ Photovoltaik, Stromspeicher & faire Verteilung an Mieter</li>"
+                "<li>✅ Eigenverbrauch, Einspeisung & Rendite im Blick</li>"
+                "<li>✅ In wenigen Minuten mit Ihren Gebäudedaten</li>"
+                "</ul>",
+                unsafe_allow_html=True,
+            )
+
+            # CTA
+            if st.button("Jetzt starten  ➜", type="primary", use_container_width=True):
+                st.session_state.show_calculator = True
+                st.rerun()
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    # WICHTIG: Rechner erst zeigen, wenn geklickt wurde
+    st.stop()
+    
+# ---- Verknüpfung WE und Verbrauch----
 if "we" not in st.session_state:
     st.session_state.we = 2
 if "we_verbrauch" not in st.session_state:
