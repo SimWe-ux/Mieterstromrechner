@@ -9,10 +9,6 @@ import pandas as pd
 from urllib.parse import quote
 from datetime import datetime
 
-# ----Seiteneinstellungen----
-st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
-st.title("Mieterstrom - Renditerechner")
-
 # Gate: Sneak Peak anzeigen dann Rechner 
 # --- Gate: Hero zuerst anzeigen, danach Rechner ---
 if "show_calculator" not in st.session_state:
@@ -60,6 +56,10 @@ if not st.session_state.show_calculator:
     # Wichtig: solange nicht geklickt wurde, hier abbrechen
     st.stop()
     
+# ----Seiteneinstellungen----
+st.set_page_config(page_title="Mieterstrom Rechner", page_icon=":chart_with_upwards_trend:", layout="centered")
+st.title("Mieterstrom - Renditerechner")
+
 # ---- Verknüpfung WE und Verbrauch----
 if "we" not in st.session_state:
     st.session_state.we = 2
