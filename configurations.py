@@ -20,9 +20,9 @@ standby_watt: float = 20 # Optionale Standby‑/Eigenverbrauchsverluste des Spei
 soc_start_kwh: float = 0.20 * speicher_kwh # Start‑Ladezustand (kWh)  
 
 # ----Preise und Vergütung----
-preis_pv_u10_kwp: float = 1500.0 # Pv Preis unter 10 kWp
+preis_pv_u10_kwp: float = 1300.0 # Pv Preis unter 10 kWp
 preis_pv_10_20_kwp: float = 1100.0 # Pv Preis zwischen 10 - 20kWp
-preis_pv_o20_kwp: float = 990.0 # Pv Preis über 20 kWp
+preis_pv_o20_kwp: float = 1000.0 # Pv Preis über 20 kWp
 speicherkosten: float  = 500 # Speicherkosten in € 
 reststromkosten: float = 0.32 # Reststromkosten in € 
 pv_stromkosten: float = 0.27 # PVstromksoten in € 
