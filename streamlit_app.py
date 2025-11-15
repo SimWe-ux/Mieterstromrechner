@@ -97,8 +97,34 @@ col1, col2 = st.columns(2)
 col1.metric("Rendite (IRR)", f"{k['irr_pct']:,.1f} %")
 col2.metric("Laufzeit (Amortisation)", "—" if k["payback_years"] is None else f"{k['payback_years']:,.1f} Jahre")
 
+
+# --- Abbildung Cashflows über 20 Jahre----
+cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
+cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
+
+# Jahresachse (Start = aktuelles Jahr)
+start_year = pd.Timestamp.today().year
+years_idx = pd.Index(range(start_year, start_year + len(cum)), name="Jahr")
+
+# Positive kumulierte Werte als "Einnahmen", negative als "Ausgaben"
+df_amort = pd.DataFrame({
+    "Einnahmen kumuliert [€]": np.where(cum > 0, cum, 0.0),
+    "Ausgaben kumuliert [€]":  np.where(cum < 0, cum, 0.0),
+}, index=years_idx)
+
+st.subheader("Amortisation über 20 Jahre")
+st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
+
+with st.expander("Weitere Ergebnisse"):
+    cols = st.columns(4)
+    
+    cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+    cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+    cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
+    cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+    
 # --- Dialog / Formular ---
-TO = "simon.wedeking@gmx.de"
+TO = "lennart@green-energy-tools.de"
 
 def send_via_mailto(subject: str, body: str):
     url = f"mailto:{TO}?subject={quote(subject)}&body={quote(body)}"
@@ -226,31 +252,6 @@ st.button(
     on_click=open_lead_dialog
 )
 
-# --- Abbildung Cashflows über 20 Jahre----
-cf = M.cashflow_n(jahre=20)                 # [-Invest, CF1, CF2, ...]
-cum = np.cumsum(cf).astype(float)           # kumulierte Cashflows
-
-# Jahresachse (Start = aktuelles Jahr)
-start_year = pd.Timestamp.today().year
-years_idx = pd.Index(range(start_year, start_year + len(cum)), name="Jahr")
-
-# Positive kumulierte Werte als "Einnahmen", negative als "Ausgaben"
-df_amort = pd.DataFrame({
-    "Einnahmen kumuliert [€]": np.where(cum > 0, cum, 0.0),
-    "Ausgaben kumuliert [€]":  np.where(cum < 0, cum, 0.0),
-}, index=years_idx)
-
-st.subheader("Amortisation über 20 Jahre")
-st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
-
-with st.expander("Weitere Ergebnisse"):
-    cols = st.columns(4)
-    
-    cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
-    cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
-    cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
-    
 st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
