@@ -117,7 +117,7 @@ st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
 cols = st.columns(4)
     
-cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+cols[0].metric("Investment (CAPEX)", f"{k['capex']:,.0f} €")
 cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
 cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
 cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
@@ -325,4 +325,4 @@ with st.expander("Jahreswerte im Überblick"):
         if getattr(C, "wp_aktiv", False):
             cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
 
-    
+"Alle angaben ohne Gewähr, dieser Rechner soll als Hilfe für Vermieter/Immobilienbesitzer bei der Rentbolitätsrechnung sein."
