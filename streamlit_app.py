@@ -256,7 +256,7 @@ st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
 
-with st.expander"Jahreswerte im Überblick":
+with st.expander("Jahreswerte im Überblick"):
     R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
     def monthly_sum(series):
