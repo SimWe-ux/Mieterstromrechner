@@ -9,7 +9,10 @@ gewerbe_aktiv: bool = False
 gewerbe_verbrauch_kwh: float = 0.0          
 
 wp_aktiv: bool = False
-wp_verbrauch_kwh: float = 0.0               
+wp_verbrauch_kwh: float = 0.0     
+
+# --- Modellwahl: EEG-Mieterstrom vs. GGV ---
+modell: str = "EEG" 
 
 # ----Pv und Battrerie----
 pv_form_exponent: float = 3.0 # PV Tageskurve 
