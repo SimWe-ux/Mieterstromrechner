@@ -300,7 +300,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     einspeise = eins * float(S.netzeinspeisung_kwh)
     rest_rev = p_rest * rest_sum  # neutral
     anzahl_we = int(getattr(C, "wohneinheiten", 1))
-    grundgebuehr_jahr = 12.0 * gg_mon
+    grundgebuehr_jahr = 12.0 * gg_mon * anzahl_we
 
     einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev + grundgebuehr_jahr
 
