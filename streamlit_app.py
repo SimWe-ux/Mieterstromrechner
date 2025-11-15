@@ -74,6 +74,15 @@ C.soc_start_kwh = 0.20 * C.speicher_kwh
 C.wp_aktiv = bool(has_wp)
 C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 
+if modell == "EEG-Mieterstrom":
+    C.modell = "EEG"
+    C.grundgebuehren  = 10.0   
+    C.reststromkosten = 0.32   
+else:
+    C.modell = "GGV"
+    C.grundgebuehren  = 5.0    
+    C.reststromkosten = 0.0    
+
 # ----OUTPUT----
 
 # ----Eigenverbrauchsquote & Autarkiegard----
