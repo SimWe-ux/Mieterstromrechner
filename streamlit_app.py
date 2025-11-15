@@ -293,11 +293,11 @@ df_long = df_plot.reset_index(drop=True).melt(
     value_name="kWh"
 )
 
-st.subheader("Monatswerte – Jahresverlauf")
+st.header("Jahreswerte im Überblick")
 st.line_chart(df_m)
 
 # ---- Werte im Überblick----
-st.header("Jahreswerte im Überblick")
+st.subheader("Verbrauchswerte")
 
 def metric_card(col, label, value, delta=None):
     with col.container(border=True):
