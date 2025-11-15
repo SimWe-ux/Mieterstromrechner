@@ -115,13 +115,12 @@ df_amort = pd.DataFrame({
 st.subheader("Amortisation über 20 Jahre")
 st.bar_chart(df_amort)   # zwei Farben: oben (Einnahmen), unten (Ausgaben)
 
-with st.expander("Weitere Ergebnisse"):
-    cols = st.columns(4)
+cols = st.columns(4)
     
-    cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
-    cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
-    cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
-    cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
+cols[0].metric("Invest (CAPEX)", f"{k['capex']:,.0f} €")
+cols[1].metric("Einnahmen Jahr 1", f"{k['einnahmen_j1']:,.0f} €")
+cols[2].metric("Kosten Jahr 1",    f"{k['kosten_j1']:,.0f} €")
+cols[3].metric("Gewinn Jahr 1",    f"{k['gewinn_j1']:,.0f} €")
     
 # --- Dialog / Formular ---
 TO = "lennart@green-energy-tools.de"
