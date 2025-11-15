@@ -81,7 +81,7 @@ if modell == "EEG-Mieterstrom":
     C.mieterstromzuschlage = 0.0238
 else:
     C.modell = "GGV"
-    C.grundgebuehren  = 5.0    
+    C.grundgebuehren  = 0.0    
     C.reststromkosten = 0.0
     C.mieterstromzuschlage = 0.0
 
