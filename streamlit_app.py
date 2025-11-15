@@ -77,11 +77,13 @@ C.wp_verbrauch_kwh = float(wp_verbrauch) if has_wp else 0.0
 if modell == "EEG-Mieterstrom":
     C.modell = "EEG"
     C.grundgebuehren  = 10.0   
-    C.reststromkosten = 0.32   
+    C.reststromkosten = 0.32
+    C.mieterstromzuschlage = 0.0238
 else:
     C.modell = "GGV"
     C.grundgebuehren  = 5.0    
-    C.reststromkosten = 0.0    
+    C.reststromkosten = 0.0
+    C.mieterstromzuschlage = 0.0
 
 # ----OUTPUT----
 
