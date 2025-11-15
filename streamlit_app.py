@@ -25,8 +25,11 @@ def _sync_we_to_verbrauch():
         
 # ---- UI: Eingabe----
 with st.sidebar:
-    eeg = st.toggle("EEG-Mieterstrom")
-    ggv = st.toggle("Gemeinschaftliche Gebäudeversorgung")
+    modell = st.radio(
+        "Modell auswählen",
+        options=["EEG-Mieterstrom", "Gemeinschaftliche Gebäudeversorgung"],
+        index=0,
+    )
 
     st.header("Immobilien Informationen")
         
