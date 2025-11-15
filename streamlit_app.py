@@ -297,7 +297,7 @@ st.subheader("Monatswerte – Jahresverlauf")
 st.line_chart(df_m)
 
 # ---- Werte im Überblick----
-st.subheader("Jahreswerte im Überblick")
+st.header("Jahreswerte im Überblick")
 
 def metric_card(col, label, value, delta=None):
     with col.container(border=True):
