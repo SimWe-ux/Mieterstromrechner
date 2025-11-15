@@ -325,4 +325,4 @@ with st.expander("Jahreswerte im Überblick"):
         if getattr(C, "wp_aktiv", False):
             cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
 
-„Alle Angaben ohne Gewähr, dieser Rechner dient als unterstützendes Werkzeug für Vermieter und Immobilienbesitzer zur Einschätzung der Rentabilität.“
+"Alle Angaben ohne Gewähr, dieser Rechner dient als unterstützendes Werkzeug für Vermieter und Immobilienbesitzer zur Einschätzung der Rentabilität."
