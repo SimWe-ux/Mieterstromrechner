@@ -87,6 +87,8 @@ else:
 
 # ----Eigenverbrauchsquote & Autarkiegard----
 
+st.caption(f"Aktives Modell: {modell}")
+
 sim = M.simulate_hourly() 
 S = sim["summen"]
 
