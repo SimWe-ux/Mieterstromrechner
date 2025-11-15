@@ -299,8 +299,9 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     ms_einnahme = ms_z * (ev_we + ev_ge + ev_wp)
     einspeise = eins * float(S.netzeinspeisung_kwh)
     rest_rev = p_rest * rest_sum  # neutral
+    grundgebuehr_jahr = 12.0 * gg_mon
 
-    einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev
+    einnahmen = verkauf_pv + ms_einnahme + einspeise + rest_rev + grundgebuehr_jahr
 
     # Kosten
     zaehler = (
@@ -308,10 +309,9 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
         + float(_get("zaehlergebuehren_pv", 50.0)) * 1.0
     )
     abrechnung = float(_get("abrechnungskosten", 70.0))
-    grundgebuehr_jahr = 12.0 * gg_mon
     rest_costs = p_rest * rest_sum  # neutral
 
-    kosten = zaehler + abrechnung + grundgebuehr_jahr + rest_costs
+    kosten = zaehler + abrechnung + rest_costs
 
     return {
         "einnahmen_j1": float(einnahmen),
