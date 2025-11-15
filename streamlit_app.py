@@ -256,73 +256,74 @@ st.markdown("***")
 
 # ---- Abbildung Jahresverlauf----
 
-R = sim["reihen"]  # stündliche Reihen aus dem Modell
+with st.expander"Jahreswerte im Überblick":
+    R = sim["reihen"]  # stündliche Reihen aus dem Modell
 
-def monthly_sum(series):
-    idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
-    s = pd.Series(series, index=idx, dtype=float)
-    return s.resample("M").sum()  # 12 Summen Jan..Dez
-
-gesamt_m  = monthly_sum(R["gesamtverbrauch"])
-pv_m      = monthly_sum(R["pv_prod"])
-ev_m      = monthly_sum(R["eigenverbrauch"])
-batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
-feedin_m  = monthly_sum(R["netzeinspeisung"])
-grid_m    = monthly_sum(R["netzbezug"])
-
-df_m = pd.concat(
-    [
-        gesamt_m.rename("Gesamtverbrauch[kWh]"),
-        pv_m.rename("PV-Erzeugung[kWh]"),
-        ev_m.rename("Eigenverbrauch[kWh]"),
-        batt_outm.rename("Batterie-Entladung[kWh]"),
-        feedin_m.rename("Netzeinspeisung[kWh]"),
-        grid_m.rename("Netzbezug[kWh]"),
-    ],
-    axis=1,
-)
-
-labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
-df_plot = df_m.copy()
-df_plot["MonatNum"] = df_plot.index.month
-df_plot["Monat"] = df_plot["MonatNum"].map(labels)
-
-df_long = df_plot.reset_index(drop=True).melt(
-    id_vars=["MonatNum","Monat"],
-    var_name="Serie",
-    value_name="kWh"
-)
-
-st.header("Jahreswerte im Überblick")
-st.line_chart(df_m)
-
-# ---- Werte im Überblick----
-st.subheader("Verbrauchswerte")
-
-def metric_card(col, label, value, delta=None):
-    with col.container(border=True):
-        st.metric(label, value, delta)
-
-row1 = st.columns(2, gap="medium")
-row2 = st.columns(2, gap="medium")
-
-metric_card(row1[0], "PV-Erzeugung",        f"{S.pv_erzeugung_kwh:,.0f} kWh")
-metric_card(row1[1], "Eigenverbrauch (Jahr)", f"{S.eigenverbrauch_kwh:,.0f} kWh")
-metric_card(row2[0], "Netzeinspeisung",     f"{S.netzeinspeisung_kwh:,.0f} kWh")
-metric_card(row2[1], "Netzbezug",           f"{S.netzbezug_kwh:,.0f} kWh")
-
-with st.expander("Weitere Ergebnisse"):
-    cols = st.columns(3)
+    def monthly_sum(series):
+        idx = pd.date_range("2021-01-01", periods=len(series), freq="H")  # 2021 = Nicht-Schaltjahr
+        s = pd.Series(series, index=idx, dtype=float)
+        return s.resample("M").sum()  # 12 Summen Jan..Dez
     
-    # immer
-    cols[0].metric("PV Eigenverbrauch Wohnungen", f"{S.eigenverbrauch_wohnung_kwh:,.0f} kWh")
-
-    # optional: Gewerbe
-    if getattr(C, "gewerbe_aktiv", False):
-        cols[1].metric("PV Eigenverbrauch Gewerbe", f"{S.eigenverbrauch_gewerbe_kwh:,.0f} kWh")
-
-    # optional: Wärmepumpe
-    if getattr(C, "wp_aktiv", False):
-        cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
+    gesamt_m  = monthly_sum(R["gesamtverbrauch"])
+    pv_m      = monthly_sum(R["pv_prod"])
+    ev_m      = monthly_sum(R["eigenverbrauch"])
+    batt_outm = monthly_sum(R["batt_to_load"])    # Entladung (AC zur Last)
+    feedin_m  = monthly_sum(R["netzeinspeisung"])
+    grid_m    = monthly_sum(R["netzbezug"])
+    
+    df_m = pd.concat(
+        [
+            gesamt_m.rename("Gesamtverbrauch[kWh]"),
+            pv_m.rename("PV-Erzeugung[kWh]"),
+            ev_m.rename("Eigenverbrauch[kWh]"),
+            batt_outm.rename("Batterie-Entladung[kWh]"),
+            feedin_m.rename("Netzeinspeisung[kWh]"),
+            grid_m.rename("Netzbezug[kWh]"),
+        ],
+        axis=1,
+    )
+    
+    labels = {1:"Jan",2:"Feb",3:"Mär",4:"Apr",5:"Mai",6:"Jun",7:"Jul",8:"Aug",9:"Sep",10:"Okt",11:"Nov",12:"Dez"}
+    df_plot = df_m.copy()
+    df_plot["MonatNum"] = df_plot.index.month
+    df_plot["Monat"] = df_plot["MonatNum"].map(labels)
+    
+    df_long = df_plot.reset_index(drop=True).melt(
+        id_vars=["MonatNum","Monat"],
+        var_name="Serie",
+        value_name="kWh"
+    )
+    
+    st.header("Jahreswerte im Überblick")
+    st.line_chart(df_m)
+    
+    # ---- Werte im Überblick----
+    st.subheader("Verbrauchswerte")
+    
+    def metric_card(col, label, value, delta=None):
+        with col.container(border=True):
+            st.metric(label, value, delta)
+    
+    row1 = st.columns(2, gap="medium")
+    row2 = st.columns(2, gap="medium")
+    
+    metric_card(row1[0], "PV-Erzeugung",        f"{S.pv_erzeugung_kwh:,.0f} kWh")
+    metric_card(row1[1], "Eigenverbrauch (Jahr)", f"{S.eigenverbrauch_kwh:,.0f} kWh")
+    metric_card(row2[0], "Netzeinspeisung",     f"{S.netzeinspeisung_kwh:,.0f} kWh")
+    metric_card(row2[1], "Netzbezug",           f"{S.netzbezug_kwh:,.0f} kWh")
+    
+    with st.expander("Weitere Ergebnisse"):
+        cols = st.columns(3)
+        
+        # immer
+        cols[0].metric("PV Eigenverbrauch Wohnungen", f"{S.eigenverbrauch_wohnung_kwh:,.0f} kWh")
+    
+        # optional: Gewerbe
+        if getattr(C, "gewerbe_aktiv", False):
+            cols[1].metric("PV Eigenverbrauch Gewerbe", f"{S.eigenverbrauch_gewerbe_kwh:,.0f} kWh")
+    
+        # optional: Wärmepumpe
+        if getattr(C, "wp_aktiv", False):
+            cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
 
     
