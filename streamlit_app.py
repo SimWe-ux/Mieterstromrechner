@@ -89,6 +89,8 @@ metric_card(row1[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f}
 
 st.markdown("***")
 
+
+
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
 st.header("Wirtschaftlichkeit")
