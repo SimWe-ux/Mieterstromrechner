@@ -145,7 +145,7 @@ def simulate_hourly() -> Dict[str, Any]:
     gesamtverbrauch = wohnung_series + wp_series + gewerbe_series
 
     # PV-Erzeugung: 950 kWh/kWp*a (Excel-typisch)
-    pv_annual_yield = 950.0 * float(C.pv_kwp)
+    pv_annual_yield = 938.0 * float(C.pv_kwp)
     pv_prod = pv_annual_yield * (R / sum_R)
 
     # Direktverbrauch / Überschuss / Defizit
