@@ -25,6 +25,10 @@ def _sync_we_to_verbrauch():
         
 # ---- UI: Eingabe----
 with st.sidebar:
+    col1, col2 = st.columns(2)
+        col1.metric(has_ge = st.toggle("EEG-Mieterstrom", value=False)) 
+        col2.metric(has_ge = st.toggle("Gemeinschaftliche Gebäudeversorgung", value=False))
+
     st.header("Immobilien Informationen")
         
 # Ändert man WE, wird we_verbrauch automatisch neu gesetzt
@@ -88,8 +92,6 @@ metric_card(row1[0], "Autarkiegrad", f"{S.autarkiegrad*100:,.1f} %")
 metric_card(row1[1], "Eigenverbrauchsquote", f"{S.eigenverbrauchsquote*100:,.1f} %")
 
 st.markdown("***")
-
-
 
 # ---- Wirtschaftlichkeitsrechnung----
 k = M.wirtschaftlichkeit_kpis(jahre=20)
