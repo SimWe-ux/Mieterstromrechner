@@ -26,8 +26,8 @@ def _sync_we_to_verbrauch():
 # ---- UI: Eingabe----
 with st.sidebar:
    col1, col2 = st.columns(2)
-    col1.metric(st.toggle("EEG-Mieterstrom", value=False))
-    col2.metric(st.toggle("Gemeinschaftliche Gebäudeversorgung", value=False))
+    col1.metric(st.toggle"EEG-Mieterstrom))
+    col2.metric(st.toggle("Gemeinschaftliche Gebäudeversorgung"))
 
     st.header("Immobilien Informationen")
         
