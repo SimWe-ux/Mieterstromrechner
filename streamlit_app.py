@@ -325,5 +325,4 @@ with st.expander("Weitere Ergebnisse"):
     if getattr(C, "wp_aktiv", False):
         cols[2].metric("PV Eigenverbrauch Wärmepumpe", f"{S.eigenverbrauch_wp_kwh:,.0f} kWh")
 
-        
-st.markdown("***")
+    
