@@ -271,10 +271,7 @@ def capex_speicher() -> float:
     return float(C.speicher_kwh) * float(_get("speicherkosten", 500.0))
 
 def capex_messtechnik() -> float:
-    messt = float(_get("messtechnik", 178.0))
-    anzahl_we = int(getattr(C, "wohneinheiten", 1))
-    return messt * anzahl_we
-
+    return float(_get("messtechnik", 178.0)) * int(getattr(C, "wohneinheiten", 1))
 
 # ---------- Wirtschaftlichkeit Jahr 1 ----------
 def wirtschaftlichkeit_j1() -> Dict[str, float]:
@@ -374,7 +371,7 @@ def payback_years(cashflows) -> float | None:
 
 
 def wirtschaftlichkeit_kpis(jahre: int = 20) -> Dict[str, float]:
-    capex = float(capex_pv() + capex_speicher())
+    capex = float(capex_pv() + capex_speicher() + capex_messtechnik())
     j1 = wirtschaftlichkeit_j1()
     cf = cashflow_n(jahre=jahre)
 
