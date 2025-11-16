@@ -285,7 +285,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     ms_z = float(_get("mieterstromzuschlage", 0.0238)) # €/kWh
     eins = _einspeise_satz()
     msb = float(_get("msb_kosten", 65.0))
-    abrechnungskosten = float(_get("abrechnung", 70.0)
+    abrechnungskosten = float(_get("abrechnung", 70.0))
 
     # PV-Eigenverbrauch je Sektor
     ev_we = float(S.eigenverbrauch_wohnung_kwh)
