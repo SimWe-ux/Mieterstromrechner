@@ -315,7 +315,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     abrechnung = float(_get("abrechnungskosten", 70.0))
     rest_costs = p_rest * rest_sum  # neutral
     msb_kosten = msb * anzahl_we 
-    kosten = zaehler + abrechnung + rest_costs + msb
+    kosten = zaehler + abrechnung + rest_costs + msb_kosten
 
     return {
         "einnahmen_j1": float(einnahmen),
