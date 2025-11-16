@@ -281,7 +281,9 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     p_rest = float(_get("reststromkosten", 0.32))      # Einkauf = Verkauf (neutral)
     gg_mon = float(_get("grundgebuehren", 10.0))       # €/Monat (ein Anschluss)
     ms_z = float(_get("mieterstromzuschlage", 0.0238)) # €/kWh
-    eins = _einspeise_satz()
+    eins = _einspeise_satz()                           # 
+    messt = float(_get("messtechnik", 178))             # Einmalige Kosten Messtechnik 
+    msb 0 float(_get8"msbkosten", 
 
     # PV-Eigenverbrauch je Sektor
     ev_we = float(S.eigenverbrauch_wohnung_kwh)
@@ -311,7 +313,8 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     )
     abrechnung = float(_get("abrechnungskosten", 70.0))
     rest_costs = p_rest * rest_sum  # neutral
-
+    messtechnik = messt * anzahl_we
+    msb =
     kosten = zaehler + abrechnung + rest_costs
 
     return {
