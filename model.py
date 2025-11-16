@@ -328,7 +328,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
 
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
-    invest = float(capex_pv() + capex_speicher()) + capex_messtechnik())
+    invest = float(capex_pv() + capex_speicher() + capex_messtechnik())
     j1 = wirtschaftlichkeit_j1()
     ein = float(j1.get("einnahmen_j1", 0.0))
     kos = float(j1.get("kosten_j1", 0.0))
