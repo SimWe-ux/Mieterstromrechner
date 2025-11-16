@@ -270,6 +270,11 @@ def capex_pv() -> float:
 def capex_speicher() -> float:
     return float(C.speicher_kwh) * float(_get("speicherkosten", 500.0))
 
+def capex_messtechnik() -> float:
+    messt = float(_get("messtechnik", 178.0))
+    anzahl_we = int(getattr(C, "wohneinheiten", 1))
+    return messt * anzahl_we
+
 
 # ---------- Wirtschaftlichkeit Jahr 1 ----------
 def wirtschaftlichkeit_j1() -> Dict[str, float]:
@@ -282,7 +287,6 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     gg_mon = float(_get("grundgebuehren", 10.0))       # €/Monat (ein Anschluss)
     ms_z = float(_get("mieterstromzuschlage", 0.0238)) # €/kWh
     eins = _einspeise_satz()                           
-    messt = float(_get("messtechnik", 178))            # Einmalige Kosten Messtechnik 
     msb = float(_get("msb_kosten", 65))                # Jährliche MSB Kosten 
 
     # PV-Eigenverbrauch je Sektor
@@ -313,7 +317,6 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
     )
     abrechnung = float(_get("abrechnungskosten", 70.0))
     rest_costs = p_rest * rest_sum  # neutral
-    messtechnik = messt * anzahl_we
     msb_kosten = msb * anzahl_we 
     kosten = zaehler + abrechnung + rest_costs + messt + msb 
 
@@ -326,7 +329,7 @@ def wirtschaftlichkeit_j1() -> Dict[str, float]:
 
 # ---------- Cashflow & IRR ----------
 def cashflow_n(jahre: int = 20):
-    invest = float(capex_pv() + capex_speicher())
+    invest = float(capex_pv() + capex_speicher()) + capex_messtechnik())
     j1 = wirtschaftlichkeit_j1()
     ein = float(j1.get("einnahmen_j1", 0.0))
     kos = float(j1.get("kosten_j1", 0.0))
