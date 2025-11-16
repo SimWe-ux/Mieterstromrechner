@@ -30,7 +30,7 @@ speicherkosten: float  = 500 # Speicherkosten in €
 reststromkosten: float = 0.32 # Reststromkosten in € 
 pv_stromkosten: float = 0.25 # PVstromksoten in € 
 grundgebuehren: float = 10 # Grundgebühren in € 
-messtechnik: float = 178 # Messtechnikkosten 
+messtechnik: float = 178.0  # Einmalige Messtechnik-Kosten
 mieterstromzuschlage = 0.0238 # EEG Mieterstromzuschlag in € 
 strompreissteigerung_pa: float = 0.03 # Strompreissteigerung pro Jahr
 einspeisevergütung_u10_kwp: float = 0.0786 # Einspeisevergütung bis 10 kWp
@@ -44,7 +44,7 @@ def einspeiseverguetung_satz(pv_kwp_value: float) -> float:
 abrechnungskosten: float = 70 # Abbrechnungssoftwarekosten 
 zaehlergebuehren_we: float = 30 # POG Zählergebühren WE
 zaehlergebuehren_pv: float = 50 # POG Zählergebühren PV/WP Zähler 
-msb_kosten: flaot = 65 # Jährliche Messstellenkosten 
+msb_kosten: float = 65.0    # Jährliche Messstellenbetriebskosten je WE
 
 def pv_preis_pro_kwp(pv_kwp_value: float) -> float:
     if pv_kwp_value < 10:
