@@ -44,7 +44,7 @@ def einspeiseverguetung_satz(pv_kwp_value: float) -> float:
 abrechnungskosten: float = 70 # Abbrechnungssoftwarekosten 
 zaehlergebuehren_we: float = 30 # POG Zählergebühren WE
 zaehlergebuehren_pv: float = 50 # POG Zählergebühren PV/WP Zähler 
-msb_kosten: float = 65.0    # Jährliche Messstellenbetriebskosten je WE
+msb_kosten: float = 70.0    # Jährliche Messstellenbetriebskosten je WE
 
 def pv_preis_pro_kwp(pv_kwp_value: float) -> float:
     if pv_kwp_value < 10:
