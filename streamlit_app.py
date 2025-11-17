@@ -347,4 +347,4 @@ with st.expander("Jahreswerte im Überblick"):
 
 
 
-"Hinweis: Alle Angaben ohne Gewähr, dieser Rechner dient als unterstützendes Werkzeug für Vermieter und Immobilienbesitzer zur Einschätzung der Rentabilität. Die Berechnung enhalten eine Strompreissteigerung von 2%."
+"Hinweis: Alle Angaben ohne Gewähr, dieser Rechner dient als unterstützendes Werkzeug für Vermieter und Immobilienbesitzer zur Einschätzung der Rentabilität. Die Berechnung enhält eine Strompreissteigerung von 2%."
