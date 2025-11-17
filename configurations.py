@@ -15,7 +15,7 @@ wp_verbrauch_kwh: float = 0.0
 modell: str = "EEG" 
 
 # ----Pv und Battrerie----
-pv_form_exponent: float = 3.0 # PV Tageskurve 
+pv_form_exponent: float = 2.0 # PV Tageskurve 
 ladeleistung: float = 3.0 # Max. Ladeleistung (kW) – konservativ
 entladeleistung: float = 3.0 # Max. Endladeleistung (kW) – konservativ
 wirkungsgrad_roundtrip: float = 0.85 # Gesamtwirkungsgrad Laden*Entladen
@@ -32,7 +32,7 @@ pv_stromkosten: float = 0.25 # PVstromksoten in €
 grundgebuehren: float = 10 # Grundgebühren in € 
 messtechnik: float = 178.0  # Einmalige Messtechnik-Kosten
 mieterstromzuschlage = 0.0238 # EEG Mieterstromzuschlag in € 
-strompreissteigerung_pa: float = 0.03 # Strompreissteigerung pro Jahr
+strompreissteigerung_pa: float = 0.02 # Strompreissteigerung pro Jahr
 einspeisevergütung_u10_kwp: float = 0.0786 # Einspeisevergütung bis 10 kWp
 einspeisevergütung_o10_kwp: float = 0.0688 # Einspeisevergütung über 10 kWp
 
